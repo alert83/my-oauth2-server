@@ -11,6 +11,7 @@ const {StateUpdateRequest} = require('st-schema');
 //
 
 (async () => {
+
     const Model = require('./model');
     const {connector, deviceStates} = require('./connector');
 
@@ -38,8 +39,7 @@ const {StateUpdateRequest} = require('st-schema');
         .post('/st/command', async (req, res) => {
             deviceStates[req.body.attribute] = req.body.value;
 
-            const client = await require('./mongo');
-            client.db('test');
+            const db = (await require('./mongo')).db();
             const collection = db.collection('CallbackAccessTokens');
 
             const tokens = await collection.find({}).toArray();

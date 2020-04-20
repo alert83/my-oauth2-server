@@ -94,8 +94,7 @@ const connector = new SchemaConnector()
          * @callbackUrls Callback and refresh token URLs
          */
         .callbackAccessHandler(async (accessToken, callbackAuthentication, callbackUrls) => {
-            const client = await require('./mongo');
-            client.db('test');
+            const db = (await require('./mongo')).db();
             const collection = db.collection('CallbackAccessTokens');
 
             await collection.findOneAndReplace({
@@ -116,8 +115,7 @@ const connector = new SchemaConnector()
          * @accessToken External cloud access token
          */
         .integrationDeletedHandler(async (accessToken) => {
-            const client = await require('./mongo');
-            client.db('test');
+            const db = (await require('./mongo')).db();
             const collection = db.collection('CallbackAccessTokens');
 
             await collection.deleteMany({accessToken: accessToken});
