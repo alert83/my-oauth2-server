@@ -1,7 +1,9 @@
 const {SchemaConnector, DeviceErrorTypes} = require('st-schema');
 const client = require('./mongo');
 //
-const deviceStates = {switch: 'off', level: 100};
+const deviceStates = {
+    'external-device-1': {switch: 'off', level: 100},
+};
 // const accessTokens = {};
 
 const connector = new SchemaConnector()
@@ -42,13 +44,13 @@ const connector = new SchemaConnector()
                     component: 'main',
                     capability: 'st.switch',
                     attribute: 'switch',
-                    value: deviceStates.switch
+                    value: deviceStates['external-device-1'].switch,
                 },
                 {
                     component: 'main',
                     capability: 'st.switchLevel',
                     attribute: 'level',
-                    value: deviceStates.level
+                    value: deviceStates['external-device-1'].level,
                 }
             ])
         })
@@ -71,12 +73,12 @@ const connector = new SchemaConnector()
                     };
                     if (cmd.capability === 'st.switchLevel' && cmd.command === 'setLevel') {
                         state.attribute = 'level';
-                        state.value = deviceStates.level = cmd.arguments[0];
+                        state.value = deviceStates[device.externalDeviceId].level = cmd.arguments[0];
                         deviceResponse.addState(state);
 
                     } else if (cmd.capability === 'st.switch') {
                         state.attribute = 'switch';
-                        state.value = deviceStates.switch = cmd.command === 'on' ? 'on' : 'off';
+                        state.value = deviceStates[device.externalDeviceId].switch = cmd.command === 'on' ? 'on' : 'off';
                         deviceResponse.addState(state);
 
                     } else {

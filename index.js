@@ -40,14 +40,14 @@ const client = require('./mongo');
             }
         })
         .post('/st/command', async (req, res) => {
-            deviceStates[req.body.attribute] = req.body.value;
+            deviceStates[req.body.deviceId][req.body.attribute] = req.body.value;
 
             const collection = client.db().collection('CallbackAccessTokens');
             const tokens = await collection.find({}).toArray();
 
             for (const token of tokens) {
                 const deviceState = [{
-                    externalDeviceId: 'external-device-1',
+                    externalDeviceId: req.body.deviceId,
                     states: [
                         {
                             component: 'main',
