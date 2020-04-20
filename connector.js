@@ -93,7 +93,7 @@ const connector = new SchemaConnector()
             callbackUrls,
         };
 
-        console.log('callbackAccessHandler', accessTokens);
+        console.log('callbackAccessHandler:', accessToken, accessTokens);
     })
 
     /**
@@ -104,7 +104,7 @@ const connector = new SchemaConnector()
     .integrationDeletedHandler(accessToken => {
         delete accessTokens[accessToken];
 
-        console.log('integrationDeletedHandler', accessTokens);
+        console.log('integrationDeletedHandler:', accessToken, accessTokens);
     })
 
     // .enableEventLogging()
