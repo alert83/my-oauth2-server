@@ -13,6 +13,8 @@ const connector = new SchemaConnector()
      * @response {DiscoveryResponse} Discovery response object
      */
     .discoveryHandler((accessToken, response) => {
+        console.log('discoveryHandler:', accessToken);
+
         response.addDevice('external-device-1', 'Test Dimmer', 'c2c-dimmer')
             .manufacturerName('Example Connector')
             .modelName('Virtual Dimmer');
@@ -25,6 +27,8 @@ const connector = new SchemaConnector()
      * @response {StateRefreshResponse} StateRefresh response object
      */
     .stateRefreshHandler((accessToken, response) => {
+        console.log('stateRefreshHandler:', accessToken);
+
         response.addDevice('external-device-1', [
             {
                 component: 'main',
@@ -48,6 +52,8 @@ const connector = new SchemaConnector()
      * @devices {array} List of ST device commands
      */
     .commandHandler((accessToken, response, devices) => {
+        console.log('commandHandler:', accessToken, devices);
+
         for (const device of devices) {
             const deviceResponse = response.addDevice(device.externalDeviceId);
             for (cmd of device.commands) {
@@ -100,6 +106,8 @@ const connector = new SchemaConnector()
 
         console.log('integrationDeletedHandler', accessTokens);
     })
+
+    .enableEventLogging()
 ;
 
 module.exports = {
