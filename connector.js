@@ -1,6 +1,6 @@
 const {SchemaConnector, DeviceErrorTypes} = require('st-schema');
 const deviceStates = {switch: 'off', level: 100};
-const accessTokens = {};
+// const accessTokens = {};
 
 const connector = new SchemaConnector()
         .clientId(process.env.ST_CLIENT_ID)
@@ -93,13 +93,21 @@ const connector = new SchemaConnector()
          * @callbackAuthentication ST access and refresh tokens for proactive state callbacks
          * @callbackUrls Callback and refresh token URLs
          */
-        .callbackAccessHandler((accessToken, callbackAuthentication, callbackUrls) => {
-            accessTokens[accessToken] = {
-                callbackAuthentication,
-                callbackUrls,
-            };
+        .callbackAccessHandler(async (accessToken, callbackAuthentication, callbackUrls) => {
+            const client = await require('./mongo');
+            client.db('test');
+            const collection = db.collection('CallbackAccessTokens');
 
-            console.log('callbackAccessHandler:', accessToken, accessTokens);
+            await collection.findOneAndReplace({
+                accessToken: accessToken,
+            }, {
+                accessToken: accessToken,
+                callbackAuthentication: callbackAuthentication,
+                callbackUrls: callbackUrls,
+            }, {upsert: true});
+            await client.close();
+
+            console.log('callbackAccessHandler:', accessToken);
         })
 
         /**
@@ -107,10 +115,15 @@ const connector = new SchemaConnector()
          * tokens and other data when that happend.
          * @accessToken External cloud access token
          */
-        .integrationDeletedHandler(accessToken => {
-            delete accessTokens[accessToken];
+        .integrationDeletedHandler(async (accessToken) => {
+            const client = await require('./mongo');
+            client.db('test');
+            const collection = db.collection('CallbackAccessTokens');
 
-            console.log('integrationDeletedHandler:', accessToken, accessTokens);
+            await collection.deleteMany({accessToken: accessToken});
+            await client.close();
+
+            console.log('integrationDeletedHandler:', accessToken);
         })
 
     // .enableEventLogging()
@@ -119,5 +132,5 @@ const connector = new SchemaConnector()
 module.exports = {
     connector: connector,
     deviceStates: deviceStates,
-    accessTokens: accessTokens
+    // accessTokens: accessTokens
 };
