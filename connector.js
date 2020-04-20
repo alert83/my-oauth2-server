@@ -84,8 +84,10 @@ const connector = new SchemaConnector()
     .callbackAccessHandler((accessToken, callbackAuthentication, callbackUrls) => {
         accessTokens[accessToken] = {
             callbackAuthentication,
-            callbackUrls
-        }
+            callbackUrls,
+        };
+
+        console.log('callbackAccessHandler', accessTokens);
     })
 
     /**
@@ -94,7 +96,9 @@ const connector = new SchemaConnector()
      * @accessToken External cloud access token
      */
     .integrationDeletedHandler(accessToken => {
-        delete accessTokens[accessToken]
+        delete accessTokens[accessToken];
+
+        console.log('integrationDeletedHandler', accessTokens);
     })
 ;
 

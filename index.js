@@ -34,7 +34,7 @@ app
             await connector.handleHttpCallback(req, res)
         }
     })
-    .post('/st/command', (req, res) => {
+    .post('/st/command', async (req, res) => {
         deviceStates[req.body.attribute] = req.body.value;
 
         for (const accessToken of Object.keys(accessTokens)) {
@@ -52,15 +52,18 @@ app
                 ]
             }];
 
-            new StateUpdateRequest(
+            const stateUpdateRequest = new StateUpdateRequest(
                 process.env.ST_CLIENT_ID,
                 process.env.ST_CLIENT_SECRET,
-            )
-                .updateState(
-                    item.callbackUrls,
-                    item.callbackAuthentication,
-                    deviceState,
-                );
+            );
+
+            console.log('stateUpdateRequest', item);
+
+            await stateUpdateRequest.updateState(
+                item.callbackUrls,
+                item.callbackAuthentication,
+                deviceState,
+            );
         }
 
         res.send(true);
