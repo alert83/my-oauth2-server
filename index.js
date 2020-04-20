@@ -29,31 +29,35 @@ app
     .set('view engine', 'ejs');
 
 app
-    .post('/', (req, res) => {
+    .post('/st', async (req, res) => {
         if (accessTokenIsValid(req)) {
-            connector.handleHttpCallback(req, res)
+            await connector.handleHttpCallback(req, res)
         }
     })
-    .post('/command', (req, res) => {
+    .post('/st/command', (req, res) => {
         deviceStates[req.body.attribute] = req.body.value;
+
         for (const accessToken of Object.keys(accessTokens)) {
             const item = accessTokens[accessToken];
-            const updateRequest = new StateUpdateRequest(process.env.ST_CLIENT_ID, process.env.ST_CLIENT_SECRET);
-            const deviceState = [
-                {
-                    externalDeviceId: 'external-device-1',
-                    states: [
-                        {
-                            component: 'main',
-                            capability: req.body.attribute === 'level' ? 'st.switchLevel' : 'st.switch',
-                            attribute: req.body.attribute,
-                            value: req.body.value
-                        }
-                    ]
-                }
-            ];
-            updateRequest.updateState(item.callbackUrls, item.callbackAuthentication, deviceState)
+
+            const deviceState = [{
+                externalDeviceId: 'external-device-1',
+                states: [
+                    {
+                        component: 'main',
+                        capability: req.body.attribute === 'level' ? 'st.switchLevel' : 'st.switch',
+                        attribute: req.body.attribute,
+                        value: req.body.value
+                    }
+                ]
+            }];
+
+            new StateUpdateRequest(
+                process.env.ST_CLIENT_ID,
+                process.env.ST_CLIENT_SECRET,
+            ).updateState(item.callbackUrls, item.callbackAuthentication, deviceState)
         }
+
         res.send({});
         res.end()
     });

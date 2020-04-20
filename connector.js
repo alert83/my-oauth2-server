@@ -5,11 +5,25 @@ const accessTokens = {};
 const connector = new SchemaConnector()
     .clientId(process.env.ST_CLIENT_ID)
     .clientSecret(process.env.ST_CLIENT_SECRET)
+
+    /**
+     * Discovery request. Respond with a list of devices. Called after installation of the
+     * connector and every six hours after that.
+     * @accessToken External cloud access token
+     * @response {DiscoveryResponse} Discovery response object
+     */
     .discoveryHandler((accessToken, response) => {
         response.addDevice('external-device-1', 'Test Dimmer', 'c2c-dimmer')
             .manufacturerName('Example Connector')
             .modelName('Virtual Dimmer');
     })
+
+    /**
+     * State refresh request. Respond with the current states of all devices. Called after
+     * device discovery runs.
+     * @accessToken External cloud access token
+     * @response {StateRefreshResponse} StateRefresh response object
+     */
     .stateRefreshHandler((accessToken, response) => {
         response.addDevice('external-device-1', [
             {
@@ -26,6 +40,13 @@ const connector = new SchemaConnector()
             }
         ])
     })
+
+    /**
+     * Device command request. Control the devices and respond with new device states
+     * @accessToken External cloud access token
+     * @response {CommandResponse} CommandResponse response object
+     * @devices {array} List of ST device commands
+     */
     .commandHandler((accessToken, response, devices) => {
         for (const device of devices) {
             const deviceResponse = response.addDevice(device.externalDeviceId);
@@ -53,6 +74,13 @@ const connector = new SchemaConnector()
         }
     })
 
+    /**
+     * Create access and refresh tokens to allow SmartThings to be informed of device state
+     * changes as they happen.
+     * @accessToken External cloud access token
+     * @callbackAuthentication ST access and refresh tokens for proactive state callbacks
+     * @callbackUrls Callback and refresh token URLs
+     */
     .callbackAccessHandler((accessToken, callbackAuthentication, callbackUrls) => {
         accessTokens[accessToken] = {
             callbackAuthentication,
@@ -60,6 +88,11 @@ const connector = new SchemaConnector()
         }
     })
 
+    /**
+     * Called when the connector is removed from SmartThings. You may want clean up access
+     * tokens and other data when that happend.
+     * @accessToken External cloud access token
+     */
     .integrationDeletedHandler(accessToken => {
         delete accessTokens[accessToken]
     })
