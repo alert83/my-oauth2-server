@@ -77,6 +77,7 @@ app
 function accessTokenIsValid(req) {
     // Replace with proper validation of issued access token
     if (req.body.authentication && req.body.authentication.token) {
+        console.log(req.body);
         return true;
     }
     res.status(401).send('Unauthorized');
