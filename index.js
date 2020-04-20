@@ -55,11 +55,20 @@ app
             new StateUpdateRequest(
                 process.env.ST_CLIENT_ID,
                 process.env.ST_CLIENT_SECRET,
-            ).updateState(item.callbackUrls, item.callbackAuthentication, deviceState)
+            )
+                .updateState(
+                    item.callbackUrls,
+                    item.callbackAuthentication,
+                    deviceState,
+                );
         }
 
-        res.send({});
-        res.end()
+        res.send(true);
+        res.end();
+    })
+    .get('/st/states', (req, res) => {
+        res.json(deviceStates);
+        res.end();
     });
 
 function accessTokenIsValid(req) {
