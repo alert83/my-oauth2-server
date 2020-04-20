@@ -1,4 +1,6 @@
 const {SchemaConnector, DeviceErrorTypes} = require('st-schema');
+const client = require('./mongo');
+//
 const deviceStates = {switch: 'off', level: 100};
 // const accessTokens = {};
 
@@ -94,9 +96,7 @@ const connector = new SchemaConnector()
          * @callbackUrls Callback and refresh token URLs
          */
         .callbackAccessHandler(async (accessToken, callbackAuthentication, callbackUrls) => {
-            const db = (await require('./mongo')).db();
-            const collection = db.collection('CallbackAccessTokens');
-
+            const collection = client.db().collection('CallbackAccessTokens');
             await collection.findOneAndReplace({
                 accessToken: accessToken,
             }, {
@@ -104,7 +104,6 @@ const connector = new SchemaConnector()
                 callbackAuthentication: callbackAuthentication,
                 callbackUrls: callbackUrls,
             }, {upsert: true});
-            await client.close();
 
             console.log('callbackAccessHandler:', accessToken);
         })
@@ -115,11 +114,8 @@ const connector = new SchemaConnector()
          * @accessToken External cloud access token
          */
         .integrationDeletedHandler(async (accessToken) => {
-            const db = (await require('./mongo')).db();
-            const collection = db.collection('CallbackAccessTokens');
-
+            const collection = client.db().collection('CallbackAccessTokens');
             await collection.deleteMany({accessToken: accessToken});
-            await client.close();
 
             console.log('integrationDeletedHandler:', accessToken);
         })

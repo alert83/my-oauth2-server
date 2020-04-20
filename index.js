@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
@@ -9,8 +10,10 @@ const Response = OAuth2Server.Response;
 //
 const {StateUpdateRequest} = require('st-schema');
 //
+const client = require('./mongo');
 
 (async () => {
+    await client.connect();
 
     const Model = require('./model');
     const {connector, deviceStates} = require('./connector');
@@ -39,11 +42,8 @@ const {StateUpdateRequest} = require('st-schema');
         .post('/st/command', async (req, res) => {
             deviceStates[req.body.attribute] = req.body.value;
 
-            const db = (await require('./mongo')).db();
-            const collection = db.collection('CallbackAccessTokens');
-
+            const collection = client.db().collection('CallbackAccessTokens');
             const tokens = await collection.find({}).toArray();
-            await client.close();
 
             for (const token of tokens) {
                 const deviceState = [{
