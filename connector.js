@@ -107,7 +107,7 @@ const connector = new SchemaConnector()
         console.log('integrationDeletedHandler', accessTokens);
     })
 
-    .enableEventLogging()
+    // .enableEventLogging()
 ;
 
 module.exports = {
