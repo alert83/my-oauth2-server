@@ -59,13 +59,24 @@ class Common extends BaseHttpController {
         res.end();
     }
 
-    @httpPost('token', tokenHandler({alwaysIssueNewRefreshToken: true, allowExtendedTokenAttributes: true}))
+    @httpPost('token', tokenHandler())
     private async token(
         @request() req: Request,
         @response() res: Response,
     ) {
         const token: Token = res.locals.oauth.token;
-        res.send({...token, client: null, user: null});
+        res.send({
+            ...token,
+
+            id_token: token._id,
+            token_type: "Bearer",
+
+            access_token: token.accessToken,
+            access_token_expires_in: token.accessTokenExpiresAt,
+
+            refresh_token: token.refreshToken,
+            refresh_token_expires_in: token.refreshTokenExpiresAt,
+        });
         res.end();
     }
 }

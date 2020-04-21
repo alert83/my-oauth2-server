@@ -108,10 +108,10 @@ export class OAuth2Model implements AuthorizationCodeModel, ClientCredentialsMod
             };
 
             const coll = db.collection<AuthorizationCode>('my-oauth2-codes');
-            await coll.findOneAndReplace({authorizationCode: _code.authorizationCode},
+            const res = await coll.findOneAndReplace({authorizationCode: _code.authorizationCode},
                 _code,
-                {upsert: true});
-            return _code ?? undefined;
+                {upsert: true, returnOriginal: false});
+            return res.ok ? res.value : undefined;
         }, callback)
     }
 
@@ -166,12 +166,12 @@ export class OAuth2Model implements AuthorizationCodeModel, ClientCredentialsMod
             };
 
             const coll = db.collection<Token>('my-oauth2-tokens');
-            await coll.findOneAndReplace(_token.accessToken ?
+            const res = await coll.findOneAndReplace(_token.accessToken ?
                 {accessToken: _token.accessToken} :
                 {refreshToken: _token.refreshToken},
                 _token,
-                {upsert: true});
-            return _token ?? undefined;
+                {upsert: true, returnOriginal: false});
+            return res.ok ? res.value : undefined;
         }, callback);
     }
 
