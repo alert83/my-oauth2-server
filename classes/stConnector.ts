@@ -4,6 +4,8 @@ import {TYPE} from "./ioc/const";
 import {inject} from "inversify";
 import {Express} from "express";
 import {MongoService} from "./mongoService";
+import {OAuth2Model} from "./OAuth2Model";
+import {Token} from "oauth2-server";
 
 //
 
@@ -30,6 +32,7 @@ export class StConnector {
     constructor(
         @inject(TYPE.Application) private readonly app: Express,
         @inject(TYPE.MongoDBClient) private readonly client: MongoService,
+        @inject(TYPE.OAuth2Model) private readonly model: OAuth2Model,
     ) {
         this.connector = new SchemaConnector()
             .clientId(process.env.ST_CLIENT_ID)
@@ -130,12 +133,17 @@ export class StConnector {
 
                 await this.client.withClient(async (db) => {
                     const collection = db.collection('CallbackAccessTokens');
+                    const token = await this.model.getAccessToken(accessToken) as Token;
+
                     await collection.findOneAndReplace({
                         accessToken,
                     }, {
                         accessToken,
                         callbackAuthentication,
                         callbackUrls,
+                        clientId: token?.client?._id,
+                        userId: token?.user?._id,
+                        username: token?.user?.username,
                     }, {upsert: true});
                 });
             })
