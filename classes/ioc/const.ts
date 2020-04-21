@@ -3,4 +3,5 @@ export const TYPE = {
   //
   MongoDBClient: Symbol.for('MongoDBClient'),
   OAuth2Model: Symbol.for('OAuth2Model'),
+  StConnector: Symbol.for('StConnector'),
 };

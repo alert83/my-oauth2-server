@@ -22,7 +22,8 @@ class Common extends BaseHttpController {
         @request() req: Request,
         @response() res: Response,
     ) {
-        console.log(req.query);
+        res.send(req.query);
+        res.end();
     }
 
     @httpGet('auth')
@@ -54,8 +55,6 @@ class Common extends BaseHttpController {
         let location = `${redirectUri}${redirectUri.includes('?') ? '&' : '?'}code=${code.authorizationCode}`;
         if (state) location += "&state=" + state;
 
-        console.log(location);
-
         res.writeHead(307, {"Location": location});
         res.end();
     }
@@ -66,9 +65,6 @@ class Common extends BaseHttpController {
         @response() res: Response,
     ) {
         const token: Token = res.locals.oauth.token;
-
-        console.log(token);
-
         res.send({...token, client: null, user: null});
         res.end();
     }

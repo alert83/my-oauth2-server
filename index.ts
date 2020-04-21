@@ -15,7 +15,6 @@ import {join} from "path";
 // the @provide() annotation will then automatically register them.
 import './classes/ioc/loader';
 //
-import {StateUpdateRequest} from "st-schema";
 import OAuth2Server from "oauth2-server";
 import {OAuth2Model} from "./classes/OAuth2Model";
 
@@ -53,61 +52,3 @@ server.setConfig((_app) => {
 });
 server.build();
 app.listen(PORT, () => console.log(`Listening on ${PORT}`));
-//
-
-false && (async () => {
-    const client = require('./classes/mongo');
-    await client.connect();
-
-    const {connector, deviceStates} = require('./classes/connector');
-
-    const _app = express();
-
-    _app
-        .post('/st', async (req, res) => {
-            // if (accessTokenIsValid(req, res)) {
-                await connector.handleHttpCallback(req, res)
-            // }
-        })
-        .post('/st/command', async (req, res) => {
-            deviceStates[req.body.deviceId][req.body.attribute] = req.body.value;
-
-            const collection = client.db().collection('CallbackAccessTokens');
-            const tokens = await collection.find({}).toArray();
-
-            for (const token of tokens) {
-                const deviceState = [{
-                    externalDeviceId: req.body.deviceId,
-                    states: [
-                        {
-                            component: 'main',
-                            capability: req.body.attribute === 'level' ? 'st.switchLevel' : 'st.switch',
-                            attribute: req.body.attribute,
-                            value: req.body.value
-                        }
-                    ]
-                }];
-
-                const stateUpdateRequest = new StateUpdateRequest(
-                    process.env.ST_CLIENT_ID,
-                    process.env.ST_CLIENT_SECRET,
-                );
-
-                console.log('stateUpdateRequest:', token);
-
-                await stateUpdateRequest.updateState(
-                    token.callbackUrls,
-                    token.callbackAuthentication,
-                    deviceState,
-                );
-            }
-
-            res.send(true);
-            res.end();
-        })
-        .get('/st/states', (req, res) => {
-            res.json(deviceStates);
-            res.end();
-        });
-
-})();

@@ -12,3 +12,6 @@ Dockerfile
 docker-compose.yml
 
 .idea
+
+*.js
+*.js.map

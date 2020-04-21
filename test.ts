@@ -1,6 +1,6 @@
 import request from "request";
 import test from "tape";
-import {spawn} from "child_process";
+import {spawn} from 'child_process';
 
 // Start the app
 const env = Object.assign({}, process.env, {PORT: 5000});

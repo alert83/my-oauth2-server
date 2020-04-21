@@ -36,6 +36,7 @@
   },
   "include": [
     "index.ts",
+    "test.ts",
     "classes/**/*.ts"
   ],
   "exclude": [
