@@ -6,6 +6,7 @@ import {Express} from "express";
 import {MongoService} from "./mongoService";
 import {OAuth2Model} from "./OAuth2Model";
 import {Token} from "oauth2-server";
+import groupBy from "lodash/groupBy";
 
 //
 
@@ -55,7 +56,7 @@ export class StConnector {
              * @response {DiscoveryResponse} Discovery response object
              */
             .discoveryHandler(async (accessToken: string, response, data) => {
-                console.log('discoveryHandler =>', accessToken, data);
+                // console.log('discoveryHandler =>', accessToken, data);
 
                 const devices: IDevice[] = await this.client.withClient(async (db) => {
                     const collection = db.collection<IDevice>('my-devices');
@@ -76,27 +77,24 @@ export class StConnector {
              * @response {StateRefreshResponse} StateRefresh response object
              */
             .stateRefreshHandler(async (accessToken: string, response, data) => {
-                console.log('stateRefreshHandler =>', accessToken, data);
+                // console.log('stateRefreshHandler =>', accessToken, data);
+
+                const ids = data.devices ? data.devices.map((d) => d.externalDeviceId) : undefined;
 
                 const devices: IDevice[] = await this.client.withClient(async (db) => {
                     const collection = db.collection<IDevice>('my-devices');
-                    return collection.find().toArray();
+                    return collection.find(ids ? {externalDeviceId: {$in: ids}} : {}).toArray();
                 });
 
-                // response.addDevice('external-device-1', [
-                //     {
-                //         component: 'main',
-                //         capability: 'st.switch',
-                //         attribute: 'switch',
-                //         value: this.deviceStates['external-device-1'].switch,
-                //     },
-                //     {
-                //         component: 'main',
-                //         capability: 'st.switchLevel',
-                //         attribute: 'level',
-                //         value: this.deviceStates['external-device-1'].level,
-                //     }
-                // ])
+                devices.forEach((d) => {
+                    const device = response.addDevice(d.externalDeviceId);
+                    const byCmp = groupBy(d.states, (s) => s.component);
+
+                    Object.entries(byCmp).forEach(([cmp, states]) => {
+                        const component = device.addComponent(cmp);
+                        states.forEach((s) => component.addState(s.capability.substr(3), s.attribute, s.value));
+                    })
+                });
             })
 
             /**
@@ -149,7 +147,7 @@ export class StConnector {
                                           callbackAuthentication: ICallbackAuthentication,
                                           callbackUrls: ICallbackUrls,
                                           data) => {
-                console.log('callbackAccessHandler =>', accessToken, data);
+                // console.log('callbackAccessHandler =>', accessToken, data);
 
                 await this.client.withClient(async (db) => {
                     const collection = db.collection('CallbackAccessTokens');
