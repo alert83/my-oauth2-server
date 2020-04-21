@@ -5,6 +5,7 @@ import {TYPE} from "../const";
 import {StateUpdateRequest} from "st-schema";
 import {StConnector} from "../../stConnector";
 import {MongoService} from "../../mongoService";
+import {OAuth2Model} from "../../OAuth2Model";
 
 @controller('/st')
 class StController extends BaseHttpController {
@@ -13,6 +14,7 @@ class StController extends BaseHttpController {
       @inject(TYPE.Application) private readonly app: Express,
       @inject(TYPE.StConnector) private readonly st: StConnector,
       @inject(TYPE.MongoDBClient) private readonly client: MongoService,
+      @inject(TYPE.OAuth2Model) private readonly model: OAuth2Model,
   ) {
     super();
   }
@@ -22,11 +24,20 @@ class StController extends BaseHttpController {
       @request() req: Request,
       @response() res: Response,
   ) {
-    console.log(req);
+    console.log(req.body);
 
-    // if (accessTokenIsValid(req, res)) {
-    await this.st.connector.handleHttpCallback(req, res)
-    // }
+    if (this.accessTokenIsValid(req, res)) {
+      await this.st.connector.handleHttpCallback(req, res)
+    }
+  }
+
+  private accessTokenIsValid(req: Request, res: Response) {
+    // Replace with proper validation of issued access token
+    if (req.body.authentication && req.body.authentication.token) {
+      return true;
+    }
+    res.status(401).send('Unauthorized');
+    return false;
   }
 
   @httpPost('command')
