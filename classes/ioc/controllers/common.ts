@@ -27,26 +27,8 @@ class Common extends BaseHttpController {
         console.log(req.params);
     }
 
-    @httpGet('authorize', authorizeHandler({
-        authenticateHandler: {
-            handle: (_request, _response) => {
-                // console.log(_request);
-                // const model: InMemoryModel = _request.req.app.get('model');
-                // model.dump();
-                return false;
-            }
-        }
-    }))
-    private authorize(
-        @request() req: Request,
-        @response() res: Response,
-    ) {
-        res.send(true);
-        res.end();
-    }
-
-    @httpGet('login')
-    private getLogin(
+    @httpGet('auth')
+    private auth(
         @request() req: Request,
         @response() res: Response,
     ) {
@@ -59,10 +41,9 @@ class Common extends BaseHttpController {
     }
 
     @httpPost('login')
-    private async postLogin(
+    private async login(
         @request() req: Request,
         @response() res: Response,
-        // next?: NextFunction,
     ) {
         console.log(req.body);
 
@@ -76,21 +57,12 @@ class Common extends BaseHttpController {
         console.log(token);
     }
 
-    @httpPost('authenticate')
-    private async authenticate(
+    @httpGet('any', authorizeHandler())
+    private any(
         @request() req: Request,
         @response() res: Response,
-        // next?: NextFunction,
     ) {
-        console.log(req.body);
-
-        const _request = new OAuth2Request(req);
-        const _response = new OAuth2Response(res);
-
-        const oAuth2: OAuth2Server = this.app.get('oauth2');
-
-        const token = await oAuth2.authenticate(_request, _response);
-
-        console.log(token);
+        res.send(true);
+        res.end();
     }
 }
