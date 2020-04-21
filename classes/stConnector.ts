@@ -7,6 +7,7 @@ import {MongoService} from "./mongoService";
 import {OAuth2Model} from "./OAuth2Model";
 import {Token} from "oauth2-server";
 import groupBy from "lodash/groupBy";
+import Bluebird from "bluebird";
 
 //
 
@@ -92,7 +93,7 @@ export class StConnector {
 
                     Object.entries(byCmp).forEach(([cmp, states]) => {
                         const component = device.addComponent(cmp);
-                        states.forEach((s) => component.addState(s.capability.substr(3), s.attribute, s.value));
+                        states.forEach((s) => component.addState(s.capability, s.attribute, s.value));
                     })
                 });
             })
@@ -103,37 +104,47 @@ export class StConnector {
              * @response {CommandResponse} CommandResponse response object
              * @devices {array} List of ST device commands
              */
-            .commandHandler(async (accessToken: string, response, devices, data) => {
-                console.log('commandHandler =>', accessToken, devices, data);
+            .commandHandler(async (
+                accessToken: string,
+                response,
+                devices: { externalDeviceId, commands: { component, capability, command, arguments: any[] }[] }[],
+                data) => {
+                // console.log('commandHandler =>', accessToken, devices, data);
 
-                for (const device of devices) {
+                // const ids = data.devices ? devices.map((d) => d.externalDeviceId) : undefined;
+                // const myDevices: IDevice[] = await this.client.withClient(async (db) => {
+                //     const collection = db.collection<IDevice>('my-devices');
+                //     return collection.find(ids ? {externalDeviceId: {$in: ids}} : {}).toArray();
+                // });
+
+                await Bluebird.each(devices, async (device) => {
                     const deviceResponse = response.addDevice(device.externalDeviceId);
-                    for (const cmd of device.commands) {
-                        const state: any = {
-                            component: cmd.component,
-                            capability: cmd.capability
-                        };
-                        if (cmd.capability === 'st.switchLevel' && cmd.command === 'setLevel') {
-                            state.attribute = 'level';
-                            state.value =
-                                // this.deviceStates[device.externalDeviceId].level =
-                                cmd.arguments[0];
-                            deviceResponse.addState(state);
 
-                        } else if (cmd.capability === 'st.switch') {
-                            state.attribute = 'switch';
-                            state.value =
-                                // this.deviceStates[device.externalDeviceId].switch =
-                                cmd.command === 'on' ? 'on' : 'off';
-                            deviceResponse.addState(state);
+                    await Bluebird.each(device.commands, async (cmd) => {
+                        const state = this.commandToState(cmd)
 
+                        if (state) {
+                            await this.client.withClient(async (db) => {
+                                const collection = db.collection<IDevice>('my-devices');
+                                await collection.updateOne(
+                                    {
+                                        externalDeviceId: device.externalDeviceId,
+                                        "states.capability": state.capability,
+                                        "states.attribute": state.attribute,
+                                    },
+                                    {$set: {"states.$": state}}
+                                )
+                            });
+
+                            deviceResponse.addState(state);
                         } else {
                             deviceResponse.setError(
                                 `Command '${cmd.command} of capability '${cmd.capability}' not supported`,
                                 DeviceErrorTypes.CAPABILITY_NOT_SUPPORTED)
                         }
-                    }
-                }
+                    });
+
+                });
             })
 
             /**
@@ -179,6 +190,48 @@ export class StConnector {
                     await collection.deleteMany({accessToken});
                 });
             })
+    }
+
+    commandToState(cmd: { component, capability, command, arguments: any[] }) {
+        const state: { component, capability, attribute, value } = {
+            component: cmd.component,
+            capability: cmd.capability,
+            attribute: undefined,
+            value: undefined,
+        };
+
+        switch (cmd.capability) {
+            case 'st.switch': {
+                state.attribute = 'switch';
+                state.value = cmd.command;
+                break;
+            }
+            default: {
+                return;
+            }
+        }
+
+        return state;
+
+        // if (cmd.capability === 'st.switchLevel' && cmd.command === 'setLevel') {
+        //     state.attribute = 'level';
+        //     state.value =
+        //         // this.deviceStates[device.externalDeviceId].level =
+        //         cmd.arguments[0];
+        //     deviceResponse.addState(state);
+        //
+        // } else if (cmd.capability === 'st.switch') {
+        //     state.attribute = 'switch';
+        //     state.value =
+        //         // this.deviceStates[device.externalDeviceId].switch =
+        //         cmd.command === 'on' ? 'on' : 'off';
+        //     deviceResponse.addState(state);
+        //
+        // } else {
+        //     deviceResponse.setError(
+        //         `Command '${cmd.command} of capability '${cmd.capability}' not supported`,
+        //         DeviceErrorTypes.CAPABILITY_NOT_SUPPORTED)
+        // }
     }
 }
 
