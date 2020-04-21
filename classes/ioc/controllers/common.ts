@@ -8,7 +8,7 @@ import {authorizeHandler, loginHandler, tokenHandler} from "../middlewares";
 import {OAuth2Model} from "../../OAuth2Model";
 import moment from "moment";
 
-@controller('/',)
+@controller('',)
 class Common extends BaseHttpController {
 
     constructor(
@@ -27,7 +27,7 @@ class Common extends BaseHttpController {
         res.end();
     }
 
-    @httpGet('auth')
+    @httpGet('/auth')
     private getAuth(
         @request() req: Request,
         @response() res: Response,
@@ -40,7 +40,7 @@ class Common extends BaseHttpController {
         res.render('pages/login', {client_id, response_type, redirect_uri, state});
     }
 
-    @httpGet('login',
+    @httpGet('/login',
         loginHandler(),
         authorizeHandler({authenticateHandler: {handle: (req: any, res: any) => req.session.user}}),
     )
@@ -60,7 +60,7 @@ class Common extends BaseHttpController {
         res.end();
     }
 
-    @httpPost('token', tokenHandler())
+    @httpPost('/token', tokenHandler())
     private async token(
         @request() req: Request,
         @response() res: Response,

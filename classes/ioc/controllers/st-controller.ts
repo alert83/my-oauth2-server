@@ -19,6 +19,16 @@ class StController extends BaseHttpController {
         super();
     }
 
+    private async accessTokenIsValid(req: Request, res: Response) {
+        const token = req.body?.authentication?.token || req.body?.token;
+        if (token && await this.model.getAccessToken(token)) {
+            return true;
+        }
+
+        res.status(401).send('Unauthorized');
+        return false;
+    }
+
     @httpPost('')
     private async main(
         @request() req: Request,
@@ -31,17 +41,7 @@ class StController extends BaseHttpController {
         }
     }
 
-    private async accessTokenIsValid(req: Request, res: Response) {
-        const token = req.body?.authentication?.token || req.body?.token;
-        if (token && await this.model.getAccessToken(token)) {
-            return true;
-        }
-
-        res.status(401).send('Unauthorized');
-        return false;
-    }
-
-    @httpPost('command')
+    @httpPost('/command')
     private async command(
         @request() req: Request,
         @response() res: Response,
