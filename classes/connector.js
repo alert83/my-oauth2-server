@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const st_schema_1 = require("st-schema");
-const mongo_1 = require("./mongo");
 const deviceStates = {
     'external-device-1': { switch: 'off', level: 100 },
 };
+const client = {};
 const connector = new st_schema_1.SchemaConnector()
     .clientId(process.env.ST_CLIENT_ID)
     .clientSecret(process.env.ST_CLIENT_SECRET)
@@ -60,7 +60,7 @@ const connector = new st_schema_1.SchemaConnector()
     }
 })
     .callbackAccessHandler(async (accessToken, callbackAuthentication, callbackUrls) => {
-    const collection = mongo_1.client.db().collection('CallbackAccessTokens');
+    const collection = client.db().collection('CallbackAccessTokens');
     await collection.findOneAndReplace({
         accessToken,
     }, {
@@ -71,7 +71,7 @@ const connector = new st_schema_1.SchemaConnector()
     console.log('callbackAccessHandler:', accessToken);
 })
     .integrationDeletedHandler(async (accessToken) => {
-    const collection = mongo_1.client.db().collection('CallbackAccessTokens');
+    const collection = client.db().collection('CallbackAccessTokens');
     await collection.deleteMany({ accessToken });
     console.log('integrationDeletedHandler:', accessToken);
 });

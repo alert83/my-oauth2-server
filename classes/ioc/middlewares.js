@@ -30,3 +30,15 @@ function authenticateHandler(options) {
     };
 }
 exports.authenticateHandler = authenticateHandler;
+function tokenHandler(options) {
+    return (req, res, next) => {
+        const oAuth2 = req.app.get('oauth2');
+        return oAuth2.token(new OAuth2Request(req), new OAuth2Response(res), options)
+            .then((token) => {
+            res.locals.oauth = { token };
+            next();
+        })
+            .catch(next);
+    };
+}
+exports.tokenHandler = tokenHandler;

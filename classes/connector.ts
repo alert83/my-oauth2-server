@@ -1,10 +1,11 @@
 import {DeviceErrorTypes, SchemaConnector} from "st-schema";
-import {client}  from "./mongo";
 //
 const deviceStates = {
     'external-device-1': {switch: 'off', level: 100},
 };
 // const accessTokens = {};
+
+const client: any = {};
 
 const connector = new SchemaConnector()
         .clientId(process.env.ST_CLIENT_ID)

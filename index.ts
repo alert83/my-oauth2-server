@@ -17,24 +17,18 @@ import './classes/ioc/loader';
 //
 import {StateUpdateRequest} from "st-schema";
 import OAuth2Server from "oauth2-server";
-import {InMemoryModel} from "./classes/model";
-
+import {OAuth2Model} from "./classes/OAuth2Model";
 
 config();
 
-const Request = OAuth2Server.Request;
-const Response = OAuth2Server.Response;
 const PORT = process.env.PORT || 5000
 
 const container = new Container();
 container.load(buildProviderModule());
-const app = express();
 
+const app = express();
 container.bind(TYPE.Application).toConstantValue(app);
 app.set('ioc container', container);
-
-const model = new InMemoryModel();
-const oAuth2 = new OAuth2Server({model});
 
 const server = new InversifyExpressServer(container, null, null, app);
 server.setConfig((_app) => {
@@ -52,17 +46,14 @@ server.setConfig((_app) => {
             debug: app.get('env') === 'development',
             log: true,
         }))
-        .set('oauth2', oAuth2)
-        .set('model', model)
+        .set('oauth2', new OAuth2Server({model: container.get<OAuth2Model>(TYPE.OAuth2Model)}))
         .set('views', join(__dirname, 'views'))
         .set('view engine', 'ejs')
     ;
 });
 server.build();
-// tslint:disable-next-line:no-console
 app.listen(PORT, () => console.log(`Listening on ${PORT}`));
 //
-
 
 false && (async () => {
     const client = require('./classes/mongo');
@@ -70,23 +61,13 @@ false && (async () => {
 
     const {connector, deviceStates} = require('./classes/connector');
 
-    // const model = new InMemoryModel();
-    const oauth = new OAuth2Server({model});
-
     const _app = express();
 
     _app
-        .use(json())
-        .use(urlencoded({extended: false}))
-        .use(express.static(join(__dirname, 'public')))
-        .set('views', join(__dirname, 'views'))
-        .set('view engine', 'ejs');
-
-    _app
         .post('/st', async (req, res) => {
-            if (accessTokenIsValid(req, res)) {
+            // if (accessTokenIsValid(req, res)) {
                 await connector.handleHttpCallback(req, res)
-            }
+            // }
         })
         .post('/st/command', async (req, res) => {
             deviceStates[req.body.deviceId][req.body.attribute] = req.body.value;
@@ -128,64 +109,5 @@ false && (async () => {
             res.json(deviceStates);
             res.end();
         });
-
-    function accessTokenIsValid(req, res) {
-        // Replace with proper validation of issued access token
-        if (req.body.authentication && req.body.authentication.token) {
-            console.log('accessTokenIsValid:', req.body);
-            return true;
-        }
-        res.status(401).send('Unauthorized');
-        return false;
-    }
-
-    _app
-        .post('/token', (req, res, next) => {
-            const request = new Request(req);
-            const response = new Response(res);
-
-            oauth.token(request, response)
-                .then((token) => {
-                    console.log(token);
-                    model.dump();
-                    next();
-                })
-                .catch((err) => {
-                    console.error(err);
-                    next(err);
-                });
-        })
-        .get('/auth1', (req, res, next) => {
-            const request = new Request(req);
-            const response = new Response(res);
-
-            oauth.authenticate(request, response)
-                .then((token) => {
-                    console.log(token);
-                    model.dump();
-                    next();
-                })
-                .catch((err) => {
-                    console.error(err);
-                    next(err);
-                });
-        })
-        .get('/auth2', (req, res, next) => {
-            const request = new Request(req);
-            const response = new Response(res);
-
-            oauth.authorize(request, response)
-                .then((token) => {
-                    console.log(token);
-                    model.dump();
-                    next();
-                })
-                .catch((err) => {
-                    console.error(err);
-                    next(err);
-                });
-        });
-
-    _app.listen(PORT, () => console.log(`Listening on ${PORT}`));
 
 })();
