@@ -1,0 +1,23 @@
+{
+  "extends": [
+    "tslint:recommended"
+  ],
+  "rulesDirectory": [],
+  "rules": {
+    "no-console": {
+      "severity": "off",
+      "options": [
+        "debug",
+        "info",
+        "log",
+        "time",
+        "timeEnd",
+        "trace"
+      ]
+    },
+    "no-unused-expression": [
+      true,
+      "allow-fast-null-checks"
+    ]
+  }
+}

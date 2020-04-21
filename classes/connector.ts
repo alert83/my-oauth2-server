@@ -1,5 +1,5 @@
-const {SchemaConnector, DeviceErrorTypes} = require('st-schema');
-const client = require('./mongo');
+import {DeviceErrorTypes, SchemaConnector} from "st-schema";
+import {client}  from "./mongo";
 //
 const deviceStates = {
     'external-device-1': {switch: 'off', level: 100},
@@ -66,8 +66,8 @@ const connector = new SchemaConnector()
 
             for (const device of devices) {
                 const deviceResponse = response.addDevice(device.externalDeviceId);
-                for (cmd of device.commands) {
-                    const state = {
+                for (const cmd of device.commands) {
+                    const state: any = {
                         component: cmd.component,
                         capability: cmd.capability
                     };
@@ -100,11 +100,11 @@ const connector = new SchemaConnector()
         .callbackAccessHandler(async (accessToken, callbackAuthentication, callbackUrls) => {
             const collection = client.db().collection('CallbackAccessTokens');
             await collection.findOneAndReplace({
-                accessToken: accessToken,
+                accessToken,
             }, {
-                accessToken: accessToken,
-                callbackAuthentication: callbackAuthentication,
-                callbackUrls: callbackUrls,
+                accessToken,
+                callbackAuthentication,
+                callbackUrls,
             }, {upsert: true});
 
             console.log('callbackAccessHandler:', accessToken);
@@ -117,7 +117,7 @@ const connector = new SchemaConnector()
          */
         .integrationDeletedHandler(async (accessToken) => {
             const collection = client.db().collection('CallbackAccessTokens');
-            await collection.deleteMany({accessToken: accessToken});
+            await collection.deleteMany({accessToken});
 
             console.log('integrationDeletedHandler:', accessToken);
         })
@@ -126,7 +126,7 @@ const connector = new SchemaConnector()
 ;
 
 module.exports = {
-    connector: connector,
-    deviceStates: deviceStates,
+    connector,
+    deviceStates,
     // accessTokens: accessTokens
 };

@@ -1,0 +1,1 @@
+{"version":3,"file":"loader.js","sourceRoot":"/","sources":["classes/ioc/loader.ts"],"names":[],"mappings":";;AAAA,oEAAoE;AACpE,yCAAsC","sourcesContent":["// when a module is loaded @provide() will automatically register it\nimport '../controllers/foo-controller'\n"]}
