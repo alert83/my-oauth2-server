@@ -116,7 +116,7 @@ let OAuth2Model = OAuth2Model_1 = class OAuth2Model {
     async getClient(clientId, clientSecret, callback) {
         return this.cbAndPromise(async (db) => {
             const coll = db.collection('my-clients');
-            const client = await coll.findOne(clientSecret ? { clientId, clientSecret } : { clientId }, { projection: { clientSecret: false } });
+            const client = await coll.findOne(clientSecret ? { clientId, clientSecret } : { clientId }, { projection: { clientSecret1: false } });
             return client !== null && client !== void 0 ? client : undefined;
         }, callback);
     }
@@ -124,14 +124,14 @@ let OAuth2Model = OAuth2Model_1 = class OAuth2Model {
         return this.cbAndPromise(async (db) => {
             const coll = db.collection('my-users');
             const data = OAuth2Model_1.saltHashPassword(password);
-            const user = await coll.findOne({ username, hash: data.passwordHash }, { projection: { hash: false } });
+            const user = await coll.findOne({ username, hash: data.passwordHash }, { projection: { hash1: false } });
             return user !== null && user !== void 0 ? user : undefined;
         }, callback);
     }
     async getUserFromClient(client, callback) {
         return this.cbAndPromise(async (db) => {
             const coll = db.collection('my-users');
-            const user = await coll.findOne({ username: client.username }, { projection: { hash: false } });
+            const user = await coll.findOne({ clientId: client.id }, { projection: { hash1: false } });
             return user !== null && user !== void 0 ? user : undefined;
         }, callback);
     }

@@ -11,18 +11,12 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const inversify_1 = require("inversify");
 const inversify_express_utils_1 = require("inversify-express-utils");
 const const_1 = require("../const");
-const oauth2_server_1 = __importDefault(require("oauth2-server"));
 const middlewares_1 = require("../middlewares");
 const OAuth2Model_1 = require("../../OAuth2Model");
-const OAuth2Request = oauth2_server_1.default.Request;
-const OAuth2Response = oauth2_server_1.default.Response;
 let Common = class Common extends inversify_express_utils_1.BaseHttpController {
     constructor(app, model) {
         super();
@@ -30,7 +24,7 @@ let Common = class Common extends inversify_express_utils_1.BaseHttpController {
         this.model = model;
     }
     root(req, res) {
-        console.log(req.params);
+        console.log(req.query);
     }
     getAuth(req, res) {
         const client_id = req.query.client_id;
@@ -39,18 +33,22 @@ let Common = class Common extends inversify_express_utils_1.BaseHttpController {
         const state = req.query.state;
         res.render('pages/login', { client_id, response_type, redirect_uri, state });
     }
-    async postAuth(req, res) {
+    async login(req, res) {
         var _a, _b;
         const code = (_b = (_a = res.locals) === null || _a === void 0 ? void 0 : _a.oauth) === null || _b === void 0 ? void 0 : _b.code;
-        const state = req.body.state;
-        let location = `${code.redirectUri}${code.redirectUri.includes('?') ? '&' : '?'}code=${code.authorizationCode}`;
+        const state = req.query.state;
+        const redirectUri = req.query.redirect_uri;
+        let location = `${redirectUri}${redirectUri.includes('?') ? '&' : '?'}code=${code.authorizationCode}`;
         if (state)
             location += "&state=" + state;
+        console.log(location);
         res.writeHead(307, { "Location": location });
         res.end();
     }
     async token(req, res) {
-        res.send(res.locals.oauth.token);
+        const token = res.locals.oauth.token;
+        console.log(token);
+        res.send(Object.assign(Object.assign({}, token), { client: null, user: null }));
         res.end();
     }
 };
@@ -71,24 +69,13 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], Common.prototype, "getAuth", null);
 __decorate([
-    inversify_express_utils_1.httpPost('auth', async (req, res, next) => {
-        try {
-            const container = req.app.get('ioc container');
-            const model = container.get(const_1.TYPE.OAuth2Model);
-            const user = await model.getUser(req.body.username, req.body.password);
-            req.session.user = user;
-            next();
-        }
-        catch (err) {
-            next(err);
-        }
-    }, middlewares_1.authorizeHandler({ authenticateHandler: { handle: (req, res) => req.session.user } })),
+    inversify_express_utils_1.httpGet('login', middlewares_1.loginHandler(), middlewares_1.authorizeHandler({ authenticateHandler: { handle: (req, res) => req.session.user } })),
     __param(0, inversify_express_utils_1.request()),
     __param(1, inversify_express_utils_1.response()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
-], Common.prototype, "postAuth", null);
+], Common.prototype, "login", null);
 __decorate([
     inversify_express_utils_1.httpPost('token', middlewares_1.tokenHandler()),
     __param(0, inversify_express_utils_1.request()),

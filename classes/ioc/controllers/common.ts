@@ -3,7 +3,7 @@ import {inject} from 'inversify';
 import {BaseHttpController, controller, httpGet, httpPost, request, response} from 'inversify-express-utils';
 import {TYPE} from '../const';
 
-import {AuthorizationCode} from "oauth2-server";
+import {AuthorizationCode, Token} from "oauth2-server";
 import {authorizeHandler, loginHandler, tokenHandler} from "../middlewares";
 import {OAuth2Model} from "../../OAuth2Model";
 
@@ -15,6 +15,14 @@ class Common extends BaseHttpController {
         @inject(TYPE.OAuth2Model) private readonly model: OAuth2Model,
     ) {
         super();
+    }
+
+    @httpGet('')
+    private root(
+        @request() req: Request,
+        @response() res: Response,
+    ) {
+        console.log(req.query);
     }
 
     @httpGet('auth')
@@ -30,20 +38,23 @@ class Common extends BaseHttpController {
         res.render('pages/login', {client_id, response_type, redirect_uri, state});
     }
 
-    @httpPost('auth',
+    @httpGet('login',
         loginHandler(),
         authorizeHandler({authenticateHandler: {handle: (req: any, res: any) => req.session.user}}),
     )
-    private async postAuth(
+    private async login(
         @request() req: Request & any,
         @response() res: Response,
         // next: NextFunction,
     ) {
         const code: AuthorizationCode = res.locals?.oauth?.code;
-        const state = req.body.state
+        const state = req.query.state
+        const redirectUri = req.query.redirect_uri
 
-        let location = `${code.redirectUri}${code.redirectUri.includes('?') ? '&' : '?'}code=${code.authorizationCode}`;
+        let location = `${redirectUri}${redirectUri.includes('?') ? '&' : '?'}code=${code.authorizationCode}`;
         if (state) location += "&state=" + state;
+
+        console.log(location);
 
         res.writeHead(307, {"Location": location});
         res.end();
@@ -54,7 +65,11 @@ class Common extends BaseHttpController {
         @request() req: Request,
         @response() res: Response,
     ) {
-        res.send(res.locals.oauth.token);
+        const token: Token = res.locals.oauth.token;
+
+        console.log(token);
+
+        res.send({...token, client: null, user: null});
         res.end();
     }
 }

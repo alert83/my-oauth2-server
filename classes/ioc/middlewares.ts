@@ -67,7 +67,7 @@ export function loginHandler() {
         try {
             const container: Container = req.app.get('ioc container');
             const model = container.get<OAuth2Model>(TYPE.OAuth2Model);
-            const user = await model.getUser(req.body.username, req.body.password);
+            const user = await model.getUser(req.query.username as string, req.query.password as string);
             (req as any).session.user = user;
             next();
         } catch (err) {

@@ -198,7 +198,7 @@ export class OAuth2Model implements AuthorizationCodeModel, ClientCredentialsMod
         return this.cbAndPromise(async (db) => {
             const coll = db.collection<Client>('my-clients');
             const client = await coll.findOne(clientSecret ? {clientId, clientSecret} : {clientId},
-                {projection: {clientSecret: false}});
+                {projection: {clientSecret1: false}});
             return client ?? undefined;
         }, callback);
     }
@@ -212,7 +212,7 @@ export class OAuth2Model implements AuthorizationCodeModel, ClientCredentialsMod
             const coll = db.collection<User>('my-users');
             const data = OAuth2Model.saltHashPassword(password);
             const user = await coll.findOne({username, hash: data.passwordHash},
-                {projection: {hash: false}});
+                {projection: {hash1: false}});
             return user ?? undefined;
         }, callback);
     }
@@ -223,8 +223,8 @@ export class OAuth2Model implements AuthorizationCodeModel, ClientCredentialsMod
     ): Promise<User | Falsey> {
         return this.cbAndPromise(async (db) => {
             const coll = db.collection<User>('my-users');
-            const user = await coll.findOne({username: client.username},
-                {projection: {hash: false}});
+            const user = await coll.findOne({clientId: client.id},
+                {projection: {hash1: false}});
             return user ?? undefined;
         }, callback);
     }

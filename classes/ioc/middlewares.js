@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const oauth2_server_1 = __importDefault(require("oauth2-server"));
+const const_1 = require("./const");
 const OAuth2Request = oauth2_server_1.default.Request;
 const OAuth2Response = oauth2_server_1.default.Response;
 function authorizeHandler(options) {
@@ -42,3 +43,18 @@ function tokenHandler(options) {
     };
 }
 exports.tokenHandler = tokenHandler;
+function loginHandler() {
+    return async (req, res, next) => {
+        try {
+            const container = req.app.get('ioc container');
+            const model = container.get(const_1.TYPE.OAuth2Model);
+            const user = await model.getUser(req.query.username, req.query.password);
+            req.session.user = user;
+            next();
+        }
+        catch (err) {
+            next(err);
+        }
+    };
+}
+exports.loginHandler = loginHandler;
