@@ -3,7 +3,7 @@ import {Express, Request, Response} from "express";
 import {inject} from "inversify";
 import {TYPE} from "../const";
 import {StateUpdateRequest} from "st-schema";
-import {StConnector} from "../../stConnector";
+import {IDevice, StConnector} from "../../stConnector";
 import {MongoService} from "../../mongoService";
 import {OAuth2Model} from "../../OAuth2Model";
 import {authorizeHandler} from "../middlewares";
@@ -47,7 +47,13 @@ class StController extends BaseHttpController {
       @request() req: Request,
       @response() res: Response,
   ) {
-    this.st.deviceStates[req.body.deviceId][req.body.attribute] = req.body.value;
+    const device: IDevice | undefined = await this.client.withClient(async (db) => {
+      const collection = db.collection<IDevice>('my-devices');
+      return collection.findOne({externalDeviceId: req.body.deviceId});
+    });
+
+    // device
+    // this.st.deviceStates[req.body.deviceId][req.body.attribute] = req.body.value;
 
     const tokens = await this.client.withClient(async (db) => {
       const collection = db.collection('CallbackAccessTokens');

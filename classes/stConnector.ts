@@ -21,13 +21,23 @@ interface ICallbackUrls {
     stateCallback: string;
 }
 
+export interface IDevice {
+    externalDeviceId: string;
+    friendlyName: string;
+    deviceHandlerType: string;
+    manufacturerInfo: { manufacturerName: string, modelName: string };
+    status: string;
+    states: {
+        component: string;
+        capability: string;
+        attribute: string;
+        value: string;
+    }[];
+}
+
 @provideIf(TYPE.StConnector, true)
 export class StConnector {
     public connector: any;
-
-    deviceStates = {
-        'external-device-1': {switch: 'off', level: 100},
-    };
 
     constructor(
         @inject(TYPE.Application) private readonly app: Express,
@@ -47,15 +57,16 @@ export class StConnector {
             .discoveryHandler(async (accessToken: string, response, data) => {
                 console.log('discoveryHandler =>', accessToken, data);
 
-                response.addDevice('external-device-1', 'Test Dimmer', 'c2c-dimmer')
-                    .manufacturerName('Example Connector')
-                    .modelName('Virtual Dimmer');
+                const devices: IDevice[] = await this.client.withClient(async (db) => {
+                    const collection = db.collection<IDevice>('my-devices');
+                    return collection.find().toArray();
+                });
 
-                response.addDevice('1ff35717-53b7-40f8-87ba-93329599c98b',
-                    'Test Watch Dog',
-                    'd7419d49-8d27-4b7b-aa0c-5c7b2d6d7651')
-                    .manufacturerName('Example Connector')
-                    .modelName('My Watch Dog');
+                devices.forEach((d) => {
+                    response.addDevice(d.externalDeviceId, d.friendlyName, d.deviceHandlerType)
+                        .manufacturerName(d?.manufacturerInfo?.manufacturerName)
+                        .modelName(d?.manufacturerInfo?.modelName);
+                });
             })
 
             /**
@@ -67,20 +78,25 @@ export class StConnector {
             .stateRefreshHandler(async (accessToken: string, response, data) => {
                 console.log('stateRefreshHandler =>', accessToken, data);
 
-                response.addDevice('external-device-1', [
-                    {
-                        component: 'main',
-                        capability: 'st.switch',
-                        attribute: 'switch',
-                        value: this.deviceStates['external-device-1'].switch,
-                    },
-                    {
-                        component: 'main',
-                        capability: 'st.switchLevel',
-                        attribute: 'level',
-                        value: this.deviceStates['external-device-1'].level,
-                    }
-                ])
+                const devices: IDevice[] = await this.client.withClient(async (db) => {
+                    const collection = db.collection<IDevice>('my-devices');
+                    return collection.find().toArray();
+                });
+
+                // response.addDevice('external-device-1', [
+                //     {
+                //         component: 'main',
+                //         capability: 'st.switch',
+                //         attribute: 'switch',
+                //         value: this.deviceStates['external-device-1'].switch,
+                //     },
+                //     {
+                //         component: 'main',
+                //         capability: 'st.switchLevel',
+                //         attribute: 'level',
+                //         value: this.deviceStates['external-device-1'].level,
+                //     }
+                // ])
             })
 
             /**
@@ -101,12 +117,16 @@ export class StConnector {
                         };
                         if (cmd.capability === 'st.switchLevel' && cmd.command === 'setLevel') {
                             state.attribute = 'level';
-                            state.value = this.deviceStates[device.externalDeviceId].level = cmd.arguments[0];
+                            state.value =
+                                // this.deviceStates[device.externalDeviceId].level =
+                                cmd.arguments[0];
                             deviceResponse.addState(state);
 
                         } else if (cmd.capability === 'st.switch') {
                             state.attribute = 'switch';
-                            state.value = this.deviceStates[device.externalDeviceId].switch = cmd.command === 'on' ? 'on' : 'off';
+                            state.value =
+                                // this.deviceStates[device.externalDeviceId].switch =
+                                cmd.command === 'on' ? 'on' : 'off';
                             deviceResponse.addState(state);
 
                         } else {
