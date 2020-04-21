@@ -6,7 +6,6 @@ import {StateUpdateRequest} from "st-schema";
 import {StConnector} from "../../stConnector";
 import {MongoService} from "../../mongoService";
 import {OAuth2Model} from "../../OAuth2Model";
-import {authenticateHandler, authorizeHandler} from "../middlewares";
 
 @controller('/st')
 class StController extends BaseHttpController {
@@ -33,7 +32,7 @@ class StController extends BaseHttpController {
     }
 
     private async accessTokenIsValid(req: Request, res: Response) {
-        const token = req.body?.authentication?.token;
+        const token = req.body?.authentication?.token || req.body?.token;
         if (token && await this.model.getAccessToken(token)) {
             return true;
         }
@@ -42,46 +41,49 @@ class StController extends BaseHttpController {
         return false;
     }
 
-    @httpPost('command', authenticateHandler())
+    @httpPost('command')
     private async command(
         @request() req: Request,
         @response() res: Response,
     ) {
-        // const device: IDevice | undefined = await this.client.withClient(async (db) => {
-        //   const collection = db.collection<IDevice>('my-devices');
-        //   return collection.findOne({externalDeviceId: req.body.deviceId});
-        // });
+        if (await this.accessTokenIsValid(req, res)) {
 
-        const deviceState = [{
-            externalDeviceId: req.body.deviceId,
-            states: [{
-                component: 'main',
-                capability: req.body.capability,
-                attribute: req.body.attribute,
-                value: req.body.value
-            }]
-        }];
+            // const device: IDevice | undefined = await this.client.withClient(async (db) => {
+            //   const collection = db.collection<IDevice>('my-devices');
+            //   return collection.findOne({externalDeviceId: req.body.deviceId});
+            // });
 
-        await this.st.updateMyState(deviceState[0].externalDeviceId, deviceState[0].states[0]);
+            const deviceState = [{
+                externalDeviceId: req.body.deviceId,
+                states: [{
+                    component: 'main',
+                    capability: req.body.capability,
+                    attribute: req.body.attribute,
+                    value: req.body.value
+                }]
+            }];
 
-        const tokens = await this.client.withClient(async (db) => {
-            const collection = db.collection('CallbackAccessTokens');
-            return await collection.find({}).toArray();
-        });
+            await this.st.updateMyState(deviceState[0].externalDeviceId, deviceState[0].states[0]);
 
-        for (const token of tokens) {
-            const stateUpdateRequest = new StateUpdateRequest(
-                process.env.ST_CLIENT_ID,
-                process.env.ST_CLIENT_SECRET,
-            );
+            const tokens = await this.client.withClient(async (db) => {
+                const collection = db.collection('CallbackAccessTokens');
+                return await collection.find({}).toArray();
+            });
 
-            await stateUpdateRequest.updateState(
-                token.callbackUrls,
-                token.callbackAuthentication,
-                deviceState,
-            );
+            for (const token of tokens) {
+                const stateUpdateRequest = new StateUpdateRequest(
+                    process.env.ST_CLIENT_ID,
+                    process.env.ST_CLIENT_SECRET,
+                );
+
+                await stateUpdateRequest.updateState(
+                    token.callbackUrls,
+                    token.callbackAuthentication,
+                    deviceState,
+                );
+            }
+
+            res.end();
         }
-
-        res.end();
     }
 }
