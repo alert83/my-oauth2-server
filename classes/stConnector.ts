@@ -111,31 +111,14 @@ export class StConnector {
                 data) => {
                 // console.log('commandHandler =>', accessToken, devices, data);
 
-                // const ids = data.devices ? devices.map((d) => d.externalDeviceId) : undefined;
-                // const myDevices: IDevice[] = await this.client.withClient(async (db) => {
-                //     const collection = db.collection<IDevice>('my-devices');
-                //     return collection.find(ids ? {externalDeviceId: {$in: ids}} : {}).toArray();
-                // });
-
                 await Bluebird.each(devices, async (device) => {
                     const deviceResponse = response.addDevice(device.externalDeviceId);
 
                     await Bluebird.each(device.commands, async (cmd) => {
-                        const state = this.commandToState(cmd)
+                        const state = this.commandToState(cmd);
 
                         if (state) {
-                            await this.client.withClient(async (db) => {
-                                const collection = db.collection<IDevice>('my-devices');
-                                await collection.updateOne(
-                                    {
-                                        externalDeviceId: device.externalDeviceId,
-                                        "states.capability": state.capability,
-                                        "states.attribute": state.attribute,
-                                    },
-                                    {$set: {"states.$": state}}
-                                )
-                            });
-
+                            await this.updateMyState(device.externalDeviceId, state);
                             deviceResponse.addState(state);
                         } else {
                             deviceResponse.setError(
@@ -206,6 +189,16 @@ export class StConnector {
                 state.value = cmd.command;
                 break;
             }
+            case 'st.healthCheck': {
+                state.attribute = 'healthStatus';
+                state.value = cmd.command;
+                break;
+            }
+            case 'st.alarm': {
+                state.attribute = 'alarm';
+                state.value = cmd.command;
+                break;
+            }
             default: {
                 return;
             }
@@ -220,18 +213,36 @@ export class StConnector {
         //         cmd.arguments[0];
         //     deviceResponse.addState(state);
         //
-        // } else if (cmd.capability === 'st.switch') {
-        //     state.attribute = 'switch';
-        //     state.value =
-        //         // this.deviceStates[device.externalDeviceId].switch =
-        //         cmd.command === 'on' ? 'on' : 'off';
-        //     deviceResponse.addState(state);
-        //
-        // } else {
-        //     deviceResponse.setError(
-        //         `Command '${cmd.command} of capability '${cmd.capability}' not supported`,
-        //         DeviceErrorTypes.CAPABILITY_NOT_SUPPORTED)
-        // }
+    }
+
+    async updateMyState(externalDeviceId, state) {
+        const myDevice: IDevice = await this.client.withClient(async (db) => {
+            const collection = db.collection<IDevice>('my-devices');
+            return await collection.findOne({externalDeviceId});
+        });
+
+        const curState = myDevice.states.find((s) =>
+            s.capability === state.capability &&
+            s.attribute === state.attribute
+        );
+
+        if (!curState || curState.value !== state.value) {
+            await this.client.withClient(async (db) => {
+                const collection = db.collection<IDevice>('my-devices');
+                await collection.updateOne(
+                    {
+                        externalDeviceId,
+                        "states.capability": state.capability,
+                        "states.attribute": state.attribute,
+                    },
+                    {$set: {"states.$": state}}
+                )
+            });
+
+            return true;
+        }
+
+        return false;
     }
 }
 
