@@ -175,6 +175,36 @@ export class StConnector {
             })
     }
 
+    async updateMyState(externalDeviceId, state) {
+        const myDevice: IDevice = await this.client.withClient(async (db) => {
+            const collection = db.collection<IDevice>('my-devices');
+            return await collection.findOne({externalDeviceId});
+        });
+
+        const curState = myDevice.states.find((s) =>
+            s.capability === state.capability &&
+            s.attribute === state.attribute
+        );
+
+        if (!curState || curState.value !== state.value) {
+            await this.client.withClient(async (db) => {
+                const collection = db.collection<IDevice>('my-devices');
+                await collection.updateOne(
+                    {
+                        externalDeviceId,
+                        "states.capability": state.capability,
+                        "states.attribute": state.attribute,
+                    },
+                    {$set: {"states.$": state}}
+                )
+            });
+
+            return true;
+        }
+
+        return false;
+    }
+
     commandToState(cmd: { component, capability, command, arguments: any[] }) {
         const state: { component, capability, attribute, value } = {
             component: cmd.component,
@@ -213,36 +243,6 @@ export class StConnector {
         //         cmd.arguments[0];
         //     deviceResponse.addState(state);
         //
-    }
-
-    async updateMyState(externalDeviceId, state) {
-        const myDevice: IDevice = await this.client.withClient(async (db) => {
-            const collection = db.collection<IDevice>('my-devices');
-            return await collection.findOne({externalDeviceId});
-        });
-
-        const curState = myDevice.states.find((s) =>
-            s.capability === state.capability &&
-            s.attribute === state.attribute
-        );
-
-        if (!curState || curState.value !== state.value) {
-            await this.client.withClient(async (db) => {
-                const collection = db.collection<IDevice>('my-devices');
-                await collection.updateOne(
-                    {
-                        externalDeviceId,
-                        "states.capability": state.capability,
-                        "states.attribute": state.attribute,
-                    },
-                    {$set: {"states.$": state}}
-                )
-            });
-
-            return true;
-        }
-
-        return false;
     }
 }
 
