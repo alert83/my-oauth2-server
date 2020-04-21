@@ -42,7 +42,7 @@ export class StConnector {
              * @response {DiscoveryResponse} Discovery response object
              */
             .discoveryHandler(async (accessToken: string, response, data) => {
-                console.log('discoveryHandler:', accessToken, response, data);
+                console.log('discoveryHandler =>', accessToken, data);
 
                 response.addDevice('external-device-1', 'Test Dimmer', 'c2c-dimmer')
                     .manufacturerName('Example Connector')
@@ -62,7 +62,7 @@ export class StConnector {
              * @response {StateRefreshResponse} StateRefresh response object
              */
             .stateRefreshHandler(async (accessToken: string, response, data) => {
-                console.log('stateRefreshHandler:', accessToken, response, data);
+                console.log('stateRefreshHandler =>', accessToken, data);
 
                 response.addDevice('external-device-1', [
                     {
@@ -87,7 +87,7 @@ export class StConnector {
              * @devices {array} List of ST device commands
              */
             .commandHandler(async (accessToken: string, response, devices, data) => {
-                console.log('commandHandler:', accessToken, response, devices, data);
+                console.log('commandHandler =>', accessToken, devices, data);
 
                 for (const device of devices) {
                     const deviceResponse = response.addDevice(device.externalDeviceId);
@@ -126,7 +126,7 @@ export class StConnector {
                                           callbackAuthentication: ICallbackAuthentication,
                                           callbackUrls: ICallbackUrls,
                                           data) => {
-                console.log('callbackAccessHandler:', accessToken, data);
+                console.log('callbackAccessHandler =>', accessToken, data);
 
                 await this.client.withClient(async (db) => {
                     const collection = db.collection('CallbackAccessTokens');
@@ -146,7 +146,7 @@ export class StConnector {
              * @accessToken External cloud access token
              */
             .integrationDeletedHandler(async (accessToken: string, data) => {
-                console.log('integrationDeletedHandler:', accessToken, data);
+                console.log('integrationDeletedHandler =>', accessToken, data);
 
                 await this.client.withClient(async (db) => {
                     const collection = db.collection('CallbackAccessTokens');

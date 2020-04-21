@@ -25,7 +25,7 @@ class StController extends BaseHttpController {
       @request() req: Request,
       @response() res: Response,
   ) {
-    console.log(req.headers, req.body);
+    // console.log(req.headers, req.body);
 
     if (await this.accessTokenIsValid(req, res)) {
       await this.st.connector.handleHttpCallback(req, res)
