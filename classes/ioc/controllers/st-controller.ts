@@ -6,7 +6,7 @@ import {StateUpdateRequest} from "st-schema";
 import {StConnector} from "../../stConnector";
 import {MongoService} from "../../mongoService";
 import {OAuth2Model} from "../../OAuth2Model";
-import {authorizeHandler} from "../middlewares";
+import {authenticateHandler, authorizeHandler} from "../middlewares";
 
 @controller('/st')
 class StController extends BaseHttpController {
@@ -42,7 +42,7 @@ class StController extends BaseHttpController {
         return false;
     }
 
-    @httpPost('command', authorizeHandler())
+    @httpPost('command', authenticateHandler())
     private async command(
         @request() req: Request,
         @response() res: Response,

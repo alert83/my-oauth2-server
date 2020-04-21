@@ -219,11 +219,6 @@ export class StConnector {
                 state.value = cmd.command;
                 break;
             }
-            case 'st.healthCheck': {
-                state.attribute = 'healthStatus';
-                state.value = cmd.command;
-                break;
-            }
             case 'st.alarm': {
                 state.attribute = 'alarm';
                 state.value = cmd.command;
