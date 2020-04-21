@@ -77,7 +77,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], Common.prototype, "login", null);
 __decorate([
-    inversify_express_utils_1.httpPost('token', middlewares_1.tokenHandler()),
+    inversify_express_utils_1.httpPost('token', middlewares_1.tokenHandler({ alwaysIssueNewRefreshToken: true, allowExtendedTokenAttributes: true })),
     __param(0, inversify_express_utils_1.request()),
     __param(1, inversify_express_utils_1.response()),
     __metadata("design:type", Function),

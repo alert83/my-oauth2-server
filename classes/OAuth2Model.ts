@@ -109,7 +109,7 @@ export class OAuth2Model implements AuthorizationCodeModel, ClientCredentialsMod
 
             const coll = db.collection<AuthorizationCode>('my-oauth2-codes');
             await coll.findOneAndReplace({authorizationCode: _code.authorizationCode},
-                {..._code, client: null, user: null},
+                _code,
                 {upsert: true});
             return _code ?? undefined;
         }, callback)
@@ -169,7 +169,7 @@ export class OAuth2Model implements AuthorizationCodeModel, ClientCredentialsMod
             await coll.findOneAndReplace(_token.accessToken ?
                 {accessToken: _token.accessToken} :
                 {refreshToken: _token.refreshToken},
-                {..._token, client: null, user: null},
+                _token,
                 {upsert: true});
             return _token ?? undefined;
         }, callback);

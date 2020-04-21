@@ -60,7 +60,7 @@ class Common extends BaseHttpController {
         res.end();
     }
 
-    @httpPost('token', tokenHandler())
+    @httpPost('token', tokenHandler({alwaysIssueNewRefreshToken: true, allowExtendedTokenAttributes: true}))
     private async token(
         @request() req: Request,
         @response() res: Response,

@@ -69,7 +69,7 @@ let OAuth2Model = OAuth2Model_1 = class OAuth2Model {
         return this.cbAndPromise(async (db) => {
             const _code = Object.assign(Object.assign({}, code), { client, clientId: client._id, user, userId: user._id });
             const coll = db.collection('my-oauth2-codes');
-            await coll.findOneAndReplace({ authorizationCode: _code.authorizationCode }, Object.assign(Object.assign({}, _code), { client: null, user: null }), { upsert: true });
+            await coll.findOneAndReplace({ authorizationCode: _code.authorizationCode }, _code, { upsert: true });
             return _code !== null && _code !== void 0 ? _code : undefined;
         }, callback);
     }
@@ -100,7 +100,7 @@ let OAuth2Model = OAuth2Model_1 = class OAuth2Model {
             const coll = db.collection('my-oauth2-tokens');
             await coll.findOneAndReplace(_token.accessToken ?
                 { accessToken: _token.accessToken } :
-                { refreshToken: _token.refreshToken }, Object.assign(Object.assign({}, _token), { client: null, user: null }), { upsert: true });
+                { refreshToken: _token.refreshToken }, _token, { upsert: true });
             return _token !== null && _token !== void 0 ? _token : undefined;
         }, callback);
     }
