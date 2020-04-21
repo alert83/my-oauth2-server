@@ -6,6 +6,7 @@ import {StateUpdateRequest} from "st-schema";
 import {StConnector} from "../../stConnector";
 import {MongoService} from "../../mongoService";
 import {OAuth2Model} from "../../OAuth2Model";
+import {authorizeHandler} from "../middlewares";
 
 @controller('/st')
 class StController extends BaseHttpController {
@@ -19,38 +20,24 @@ class StController extends BaseHttpController {
     super();
   }
 
-  @httpGet('')
-  private async main1(
-      @request() req: Request,
-      @response() res: Response,
-  ) {
-    console.log(req.query);
-
-    if (this.accessTokenIsValid(req, res)) {
-      await this.st.connector.handleHttpCallback(req, res)
-    }
-  }
-
-  @httpPost('')
-  private async main2(
+  @httpPost('', authorizeHandler())
+  private async main(
       @request() req: Request,
       @response() res: Response,
   ) {
     console.log(req.body);
 
-    if (this.accessTokenIsValid(req, res)) {
+    if (await this.accessTokenIsValid(req, res)) {
       await this.st.connector.handleHttpCallback(req, res)
     }
   }
 
-  private accessTokenIsValid(req: Request, res: Response) {
-    // Replace with proper validation of issued access token
-    if (
-        req?.body?.authentication?.token ||
-        req?.query?.authentication
-    ) {
+  private async accessTokenIsValid(req: Request, res: Response) {
+    const token = req.body?.authentication?.token;
+    if (token && await this.model.getAccessToken(token)) {
       return true;
     }
+
     res.status(401).send('Unauthorized');
     return false;
   }

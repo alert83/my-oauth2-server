@@ -42,7 +42,7 @@ export class StConnector {
              * @response {DiscoveryResponse} Discovery response object
              */
             .discoveryHandler(async (accessToken: string, response, data) => {
-                console.log('discoveryHandler:', accessToken, data);
+                console.log('discoveryHandler:', accessToken, response, data);
 
                 response.addDevice('external-device-1', 'Test Dimmer', 'c2c-dimmer')
                     .manufacturerName('Example Connector')

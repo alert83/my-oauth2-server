@@ -6,6 +6,7 @@ import {TYPE} from '../const';
 import {AuthorizationCode, Token} from "oauth2-server";
 import {authorizeHandler, loginHandler, tokenHandler} from "../middlewares";
 import {OAuth2Model} from "../../OAuth2Model";
+import moment from "moment";
 
 @controller('/',)
 class Common extends BaseHttpController {
@@ -68,14 +69,10 @@ class Common extends BaseHttpController {
         res.send({
             ...token,
 
-            id_token: token._id,
-            token_type: "Bearer",
-
             access_token: token.accessToken,
-            access_token_expires_in: token.accessTokenExpiresAt,
-
+            token_type: "bearer",
             refresh_token: token.refreshToken,
-            refresh_token_expires_in: token.refreshTokenExpiresAt,
+            expires_in: moment(token.accessTokenExpiresAt).diff(moment(), 'seconds'),
         });
         res.end();
     }
