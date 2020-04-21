@@ -1,4 +1,4 @@
-import {BaseHttpController, controller, httpPost, request, response} from 'inversify-express-utils';
+import {BaseHttpController, controller, httpGet, httpPost, request, response} from 'inversify-express-utils';
 import {Express, Request, Response} from "express";
 import {inject} from "inversify";
 import {TYPE} from "../const";
@@ -19,8 +19,20 @@ class StController extends BaseHttpController {
     super();
   }
 
+  @httpGet('')
+  private async main1(
+      @request() req: Request,
+      @response() res: Response,
+  ) {
+    console.log(req.query);
+
+    if (this.accessTokenIsValid(req, res)) {
+      await this.st.connector.handleHttpCallback(req, res)
+    }
+  }
+
   @httpPost('')
-  private async main(
+  private async main2(
       @request() req: Request,
       @response() res: Response,
   ) {
@@ -33,7 +45,10 @@ class StController extends BaseHttpController {
 
   private accessTokenIsValid(req: Request, res: Response) {
     // Replace with proper validation of issued access token
-    if (req.body.authentication && req.body.authentication.token) {
+    if (
+        req?.body?.authentication?.token ||
+        req?.query?.authentication
+    ) {
       return true;
     }
     res.status(401).send('Unauthorized');
