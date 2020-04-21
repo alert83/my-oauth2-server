@@ -1,5 +1,8 @@
 import {NextFunction, Request, Response} from "express";
 import OAuth2Server, {AuthenticateOptions, AuthorizeOptions, TokenOptions} from "oauth2-server";
+import {Container} from "inversify";
+import {OAuth2Model} from "../OAuth2Model";
+import {TYPE} from "./const";
 
 const OAuth2Request = OAuth2Server.Request;
 const OAuth2Response = OAuth2Server.Response;
@@ -52,6 +55,24 @@ export function tokenHandler(options?: TokenOptions) {
                 next();
             })
             .catch(next);
+    }
+}
+
+export function loginHandler() {
+    return async (
+        req: Request,
+        res: Response,
+        next: NextFunction,
+    ) => {
+        try {
+            const container: Container = req.app.get('ioc container');
+            const model = container.get<OAuth2Model>(TYPE.OAuth2Model);
+            const user = await model.getUser(req.body.username, req.body.password);
+            (req as any).session.user = user;
+            next();
+        } catch (err) {
+            next(err);
+        }
     }
 }
 

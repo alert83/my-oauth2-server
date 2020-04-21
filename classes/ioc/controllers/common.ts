@@ -1,14 +1,11 @@
-import {Express, NextFunction, Request, Response} from 'express';
-import {Container, inject} from 'inversify';
+import {Express, Request, Response} from 'express';
+import {inject} from 'inversify';
 import {BaseHttpController, controller, httpGet, httpPost, request, response} from 'inversify-express-utils';
 import {TYPE} from '../const';
 
-import OAuth2Server, {AuthorizationCode} from "oauth2-server";
-import {authorizeHandler, tokenHandler} from "../middlewares";
+import {AuthorizationCode} from "oauth2-server";
+import {authorizeHandler, loginHandler, tokenHandler} from "../middlewares";
 import {OAuth2Model} from "../../OAuth2Model";
-
-const OAuth2Request = OAuth2Server.Request;
-const OAuth2Response = OAuth2Server.Response;
 
 @controller('/',)
 class Common extends BaseHttpController {
@@ -18,14 +15,6 @@ class Common extends BaseHttpController {
         @inject(TYPE.OAuth2Model) private readonly model: OAuth2Model,
     ) {
         super();
-    }
-
-    @httpGet('')
-    public root(
-        @request() req: Request,
-        @response() res: Response,
-    ) {
-        console.log(req.params);
     }
 
     @httpGet('auth')
@@ -42,17 +31,7 @@ class Common extends BaseHttpController {
     }
 
     @httpPost('auth',
-        async (req, res, next) => {
-            try {
-                const container: Container = req.app.get('ioc container');
-                const model = container.get<OAuth2Model>(TYPE.OAuth2Model);
-                const user = await model.getUser(req.body.username, req.body.password);
-                (req as any).session.user = user;
-                next();
-            } catch (err) {
-                next(err);
-            }
-        },
+        loginHandler(),
         authorizeHandler({authenticateHandler: {handle: (req: any, res: any) => req.session.user}}),
     )
     private async postAuth(
