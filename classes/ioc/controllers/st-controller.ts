@@ -20,12 +20,12 @@ class StController extends BaseHttpController {
     super();
   }
 
-  @httpPost('', authorizeHandler())
+  @httpPost('')
   private async main(
       @request() req: Request,
       @response() res: Response,
   ) {
-    console.log(req.body);
+    console.log(req.headers, req.body);
 
     if (await this.accessTokenIsValid(req, res)) {
       await this.st.connector.handleHttpCallback(req, res)
@@ -42,7 +42,7 @@ class StController extends BaseHttpController {
     return false;
   }
 
-  @httpPost('command')
+  @httpPost('command', authorizeHandler())
   private async command(
       @request() req: Request,
       @response() res: Response,
