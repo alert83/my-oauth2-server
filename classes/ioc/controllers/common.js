@@ -30,18 +30,14 @@ let Common = class Common extends inversify_express_utils_1.BaseHttpController {
     root(req, res) {
         console.log(req.params);
     }
-    authorize(req, res) {
-        res.send(true);
-        res.end();
-    }
-    getLogin(req, res) {
+    auth(req, res) {
         const client_id = req.query.client_id;
         const response_type = req.query.response_type;
         const redirect_uri = req.query.redirect_uri;
         const state = req.query.state;
         res.render('pages/login', { client_id, response_type, redirect_uri, state });
     }
-    async postLogin(req, res) {
+    async login(req, res) {
         console.log(req.body);
         const _request = new OAuth2Request(req);
         const _response = new OAuth2Response(res);
@@ -49,13 +45,9 @@ let Common = class Common extends inversify_express_utils_1.BaseHttpController {
         const token = await oAuth2.token(_request, _response);
         console.log(token);
     }
-    async authenticate(req, res) {
-        console.log(req.body);
-        const _request = new OAuth2Request(req);
-        const _response = new OAuth2Response(res);
-        const oAuth2 = this.app.get('oauth2');
-        const token = await oAuth2.authenticate(_request, _response);
-        console.log(token);
+    any(req, res) {
+        res.send(true);
+        res.end();
     }
 };
 __decorate([
@@ -67,27 +59,13 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], Common.prototype, "root", null);
 __decorate([
-    inversify_express_utils_1.httpGet('authorize', middlewares_1.authorizeHandler({
-        authenticateHandler: {
-            handle: (_request, _response) => {
-                return false;
-            }
-        }
-    })),
+    inversify_express_utils_1.httpGet('auth'),
     __param(0, inversify_express_utils_1.request()),
     __param(1, inversify_express_utils_1.response()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", void 0)
-], Common.prototype, "authorize", null);
-__decorate([
-    inversify_express_utils_1.httpGet('login'),
-    __param(0, inversify_express_utils_1.request()),
-    __param(1, inversify_express_utils_1.response()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
-    __metadata("design:returntype", void 0)
-], Common.prototype, "getLogin", null);
+], Common.prototype, "auth", null);
 __decorate([
     inversify_express_utils_1.httpPost('login'),
     __param(0, inversify_express_utils_1.request()),
@@ -95,15 +73,15 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
-], Common.prototype, "postLogin", null);
+], Common.prototype, "login", null);
 __decorate([
-    inversify_express_utils_1.httpPost('authenticate'),
+    inversify_express_utils_1.httpGet('any', middlewares_1.authorizeHandler()),
     __param(0, inversify_express_utils_1.request()),
     __param(1, inversify_express_utils_1.response()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object]),
-    __metadata("design:returntype", Promise)
-], Common.prototype, "authenticate", null);
+    __metadata("design:returntype", void 0)
+], Common.prototype, "any", null);
 Common = __decorate([
     inversify_express_utils_1.controller('/'),
     __param(0, inversify_1.inject(const_1.TYPE.Application)),

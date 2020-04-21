@@ -8,7 +8,8 @@
   "main": "index.ts",
   "scripts": {
     "start": "tsc && ts-node .",
-    "test": "tsc && ts-node test.ts"
+    "test": "tsc && ts-node test.ts",
+    "heroku-postbuild": "tsc"
   },
   "dependencies": {
     "bluebird": "^3.7.2",
