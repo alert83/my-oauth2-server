@@ -47,8 +47,6 @@ class StController extends BaseHttpController {
         @request() req: Request,
         @response() res: Response,
     ) {
-        console.log(req.headers, req.header('x-authorization') === process.env.AUTH_TOKEN);
-
         if (req.header('x-authorization') === process.env.AUTH_TOKEN) {
 
             // const device: IDevice | undefined = await this.client.withClient(async (db) => {
@@ -93,6 +91,7 @@ class StController extends BaseHttpController {
                     deviceState,
                 );
             }
+            res.status(200);
             res.end();
         } else {
             res.status(401).send('Unauthorized');
