@@ -42,21 +42,30 @@ class StController extends BaseHttpController {
         }
     }
 
+    private async xAuthIsValid(req: Request, res: Response) {
+        if (req.header('x-authorization') === process.env.AUTH_TOKEN) {
+            return true;
+        }
+
+        res.status(401).send('Unauthorized');
+        return false;
+    }
+
     @httpPost('/command')
     private async command(
         @request() req: Request,
         @response() res: Response,
     ) {
-        console.log(req.headers);
-
-        if (req.header('x-authorization') === process.env.AUTH_TOKEN) {
+        if (await this.xAuthIsValid(req, res)) {
 
             // const device: IDevice | undefined = await this.client.withClient(async (db) => {
             //   const collection = db.collection<IDevice>('my-devices');
             //   return collection.findOne({externalDeviceId: req.body.deviceId});
             // });
 
-            const externalDeviceId = req.body.deviceId;
+            const data = req.body;
+
+            const externalDeviceId = req.body.data;
 
             let value = req.body.value;
             value = !isNaN(Number(value)) ? Number(value) : value;
@@ -94,9 +103,6 @@ class StController extends BaseHttpController {
                 );
             }
             res.status(200);
-            res.end();
-        } else {
-            res.status(401).send('Unauthorized');
             res.end();
         }
     }
