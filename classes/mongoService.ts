@@ -14,10 +14,11 @@ export class MongoService {
 
     async withClient(fn: (db: Db) => Promise<any>) {
         try {
-            if (!this.client.isConnected()) await this.client.connect();
+            if (!this.client.isConnected())
+                await this.client.connect();
             return await fn(this.client.db());
         } finally {
-            // await this.client.close();
+            await this.client.close();
         }
     }
 }
