@@ -32,6 +32,7 @@ export interface IDeviceState {
     value: string | number;
     unit?: string;
     data?: any;
+    cdate?: Date;
 }
 
 export interface IDevice {
@@ -206,7 +207,7 @@ export class StConnector {
             curState.unit !== state.unit ||
             curState.data !== state.data
         )) {
-            const newState: IDeviceState = compact(merge({}, curState, state));
+            const newState: IDeviceState = compact(merge({}, curState, state, {cdate: new Date()}));
             await this.client.withClient(async (db) => {
                 const collection = db.collection<IDevice>('my-devices');
                 await collection.updateOne(
