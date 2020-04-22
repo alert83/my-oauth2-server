@@ -191,7 +191,7 @@ export class StConnector {
             return await collection.findOne({externalDeviceId});
         });
 
-        const curState = myDevice.states.find((s) =>
+        const curState = (myDevice?.states ?? []).find((s) =>
             s.capability === state.capability &&
             s.attribute === state.attribute
         );
