@@ -6,21 +6,24 @@ import {provideIf} from "./ioc/ioc";
 export class MongoService {
     private client: MongoClient;
 
+    // tslint:disable-next-line:no-empty
     constructor() {
-        this.client = new MongoClient(process.env.MONGO_URI ?? '', {
-            useUnifiedTopology: true,
-        });
+    }
+
+    private async getConnection() {
+        if (!this.client) {
+            const client = new MongoClient(process.env.MONGO_URI ?? '', {
+                useUnifiedTopology: true,
+            });
+
+            this.client = await client.connect();
+        }
+        return this.client;
     }
 
     async withClient(fn: (db: Db) => Promise<any>) {
-        try {
-            // if (!this.client.isConnected())
-            await this.client.connect();
-            const res = await fn(this.client.db());
-            return res;
-        } finally {
-            await this.client.close(true);
-        }
+        const conn = await this.getConnection();
+        return await fn(conn.db());
     }
 }
 

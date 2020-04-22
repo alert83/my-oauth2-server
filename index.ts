@@ -22,7 +22,7 @@ config();
 
 const PORT = process.env.PORT || 5000
 
-const container = new Container();
+const container = new Container({defaultScope: "Singleton"});
 container.load(buildProviderModule());
 
 const app = express();
