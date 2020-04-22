@@ -59,32 +59,31 @@ class StController extends BaseHttpController {
     ) {
         if (await this.xAuthIsValid(req, res)) {
 
-            const deviceState: { externalDeviceId, states: IDeviceState[] }[] = [];
-
             console.log(req.body);
 
             const devices: any[] = req.body.devices ?? [];
-            await Bluebird.each(devices, async (d) => {
-                const externalDeviceId: string = d.deviceId;
-                let states: IDeviceState[] = d.states;
+            const deviceState: { externalDeviceId, states: IDeviceState[] }[] =
+                await Bluebird.each(devices, async (d) => {
+                    const externalDeviceId: string = d.deviceId;
+                    let states: IDeviceState[] = d.states;
 
-                states = await Bluebird.mapSeries(states, async (s) => {
-                    let value = s.value;
-                    value = !isNaN(Number(value)) ? Number(value) : value;
+                    states = await Bluebird.mapSeries(states, async (s) => {
+                        let value = s.value;
+                        value = !isNaN(Number(value)) ? Number(value) : value;
 
-                    const state: IDeviceState = compact({
-                        component: 'main',
-                        capability: s.capability,
-                        attribute: s.attribute,
-                        value,
-                        unit: s.unit,
-                        data: s.data,
-                    });
-                    return compact(await this.st.updateMyState(externalDeviceId, state) ?? state);
-                })
+                        const state: IDeviceState = compact({
+                            component: 'main',
+                            capability: s.capability,
+                            attribute: s.attribute,
+                            value,
+                            unit: s.unit,
+                            data: s.data,
+                        });
+                        return compact(await this.st.updateMyState(externalDeviceId, state) ?? state);
+                    })
 
-                return {externalDeviceId, states};
-            });
+                    return {externalDeviceId, states};
+                });
 
             console.log(deviceState);
 
