@@ -10,6 +10,7 @@ import groupBy from "lodash/groupBy";
 import Bluebird from "bluebird";
 import { merge } from "lodash";
 import {compact} from "./utils";
+import moment from "moment";
 
 //
 
@@ -18,6 +19,7 @@ interface ICallbackAuthentication {
     accessToken: string;
     refreshToken: string;
     expiresIn: number;
+    expiresAt?: Date;
 }
 
 interface ICallbackUrls {
@@ -167,11 +169,15 @@ export class StConnector {
                         accessToken,
                     }, {
                         accessToken,
-                        callbackAuthentication,
+                        callbackAuthentication: {
+                            ...callbackAuthentication,
+                            expiresAt: moment().add(callbackAuthentication.expiresIn, "seconds").toDate(),
+                        },
                         callbackUrls,
                         clientId: token?.client?._id,
                         userId: token?.user?._id,
                         username: token?.user?.username,
+                        ctime: new Date(),
                     }, {upsert: true});
                 });
             })

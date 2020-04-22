@@ -85,21 +85,27 @@ class StController extends BaseHttpController {
 
             const tokens = await this.client.withClient(async (db) => {
                 const collection = db.collection('CallbackAccessTokens');
-                return await collection.find({}).toArray();
+                return await collection
+                    .find({"callbackAuthentication.expiresAt": {$gte: new Date()}})
+                    .sort({_id: -1})
+                    .toArray();
             });
 
-            for (const token of tokens) {
-                const stateUpdateRequest = new StateUpdateRequest(
-                    process.env.ST_CLIENT_ID,
-                    process.env.ST_CLIENT_SECRET,
-                );
+            await Promise.all(
+                tokens.map(async (token) => {
+                    const stateUpdateRequest = new StateUpdateRequest(
+                        process.env.ST_CLIENT_ID,
+                        process.env.ST_CLIENT_SECRET,
+                    );
 
-                await stateUpdateRequest.updateState(
-                    token.callbackUrls,
-                    token.callbackAuthentication,
-                    deviceState,
-                );
-            }
+                    await stateUpdateRequest.updateState(
+                        token.callbackUrls,
+                        token.callbackAuthentication,
+                        deviceState,
+                    );
+                })
+            );
+
             res.status(200).send({});
         }
     }
