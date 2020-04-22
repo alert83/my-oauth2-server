@@ -7,6 +7,7 @@ import {IDeviceState, StConnector} from "../../stConnector";
 import {MongoService} from "../../mongoService";
 import {OAuth2Model} from "../../OAuth2Model";
 import {compact} from "../../utils";
+import Bluebird from "bluebird";
 
 @controller('/st')
 class StController extends BaseHttpController {
@@ -58,30 +59,32 @@ class StController extends BaseHttpController {
     ) {
         if (await this.xAuthIsValid(req, res)) {
 
-            // const device: IDevice | undefined = await this.client.withClient(async (db) => {
-            //   const collection = db.collection<IDevice>('my-devices');
-            //   return collection.findOne({externalDeviceId: req.body.deviceId});
-            // });
+            const deviceState: { externalDeviceId, states: IDeviceState[] }[] = [];
 
-            const externalDeviceId = req.body.deviceId;
+            const devices: any[] = req.body.devices ?? [];
+            await Bluebird.each(devices, async (d) => {
+                const externalDeviceId: string = d.deviceId;
+                let states: IDeviceState[] = d.states;
 
-            let value = req.body.value;
-            value = !isNaN(Number(value)) ? Number(value) : value;
+                states = await Bluebird.mapSeries(states, async (s) => {
+                    let value = s.value;
+                    value = !isNaN(Number(value)) ? Number(value) : value;
 
-            let state: IDeviceState = compact({
-                component: 'main',
-                capability: req.body.capability,
-                attribute: req.body.attribute,
-                value,
-                unit: req.body.unit,
-                data: req.body.data,
+                    const state: IDeviceState = compact({
+                        component: 'main',
+                        capability: s.capability,
+                        attribute: s.attribute,
+                        value,
+                        unit: s.unit,
+                        data: s.data,
+                    });
+                    return compact(await this.st.updateMyState(externalDeviceId, state) ?? state);
+                })
+
+                return {externalDeviceId, states};
             });
-            state = compact(await this.st.updateMyState(externalDeviceId, state) ?? state);
 
-            const deviceState = [{
-                externalDeviceId,
-                states: [state]
-            }];
+            console.log(deviceState);
 
             const tokens = await this.client.withClient(async (db) => {
                 const collection = db.collection('CallbackAccessTokens');
@@ -106,7 +109,7 @@ class StController extends BaseHttpController {
                 })
             );
 
-            res.status(200).send({});
+            res.send(true);
         }
     }
 }
