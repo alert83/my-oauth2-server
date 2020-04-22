@@ -8,6 +8,8 @@ import {OAuth2Model} from "./OAuth2Model";
 import {Token} from "oauth2-server";
 import groupBy from "lodash/groupBy";
 import Bluebird from "bluebird";
+import { merge } from "lodash";
+import {compact} from "./utils";
 
 //
 
@@ -128,12 +130,7 @@ export class StConnector {
                         let state = this.commandToState(cmd);
 
                         if (state) {
-                            state = await this.updateMyState(device.externalDeviceId, state) ?? state;
-                            state = {
-                                ...state,
-                                unit: state.unit || undefined,
-                                data: state.data || undefined
-                            }
+                            state = compact(await this.updateMyState(device.externalDeviceId, state) ?? state);
                             deviceResponse.addState(state);
                         } else {
                             deviceResponse.setError(
@@ -206,12 +203,7 @@ export class StConnector {
             curState.unit !== state.unit ||
             curState.data !== state.data
         )) {
-            let newState: IDeviceState = {...curState, ...state};
-            newState = {
-                ...newState,
-                unit: newState.unit || undefined,
-                data: newState.data || undefined,
-            };
+            const newState: IDeviceState = compact(merge({}, curState, state));
             await this.client.withClient(async (db) => {
                 const collection = db.collection<IDevice>('my-devices');
                 await collection.updateOne(
@@ -252,7 +244,7 @@ export class StConnector {
             }
         }
 
-        return state;
+        return compact(state);
 
         // if (cmd.capability === 'st.switchLevel' && cmd.command === 'setLevel') {
         //     state.attribute = 'level';

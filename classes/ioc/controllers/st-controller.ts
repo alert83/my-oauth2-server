@@ -6,6 +6,7 @@ import {StateUpdateRequest} from "st-schema";
 import {IDeviceState, StConnector} from "../../stConnector";
 import {MongoService} from "../../mongoService";
 import {OAuth2Model} from "../../OAuth2Model";
+import {compact} from "../../utils";
 
 @controller('/st')
 class StController extends BaseHttpController {
@@ -58,15 +59,15 @@ class StController extends BaseHttpController {
             let value = req.body.value;
             value = !isNaN(Number(value)) ? Number(value) : value;
 
-            let state: IDeviceState = {
+            let state: IDeviceState = compact({
                 component: 'main',
                 capability: req.body.capability,
                 attribute: req.body.attribute,
                 value,
-                unit: req.body.unit || undefined,
-                data: req.body.data || undefined,
-            };
-            state = await this.st.updateMyState(externalDeviceId, state) ?? state;
+                unit: req.body.unit,
+                data: req.body.data,
+            });
+            state = compact(await this.st.updateMyState(externalDeviceId, state) ?? state);
 
             const deviceState = [{
                 externalDeviceId,
