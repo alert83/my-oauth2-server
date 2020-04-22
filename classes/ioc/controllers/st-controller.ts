@@ -63,9 +63,7 @@ class StController extends BaseHttpController {
             //   return collection.findOne({externalDeviceId: req.body.deviceId});
             // });
 
-            const data = req.body;
-
-            const externalDeviceId = req.body.data;
+            const externalDeviceId = req.body.deviceId;
 
             let value = req.body.value;
             value = !isNaN(Number(value)) ? Number(value) : value;
