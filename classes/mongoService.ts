@@ -16,7 +16,8 @@ export class MongoService {
         try {
             // if (!this.client.isConnected())
             await this.client.connect();
-            return await fn(this.client.db());
+            const res = await fn(this.client.db());
+            return res;
         } finally {
             await this.client.close(true);
         }
