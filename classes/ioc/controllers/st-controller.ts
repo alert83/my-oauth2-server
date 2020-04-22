@@ -3,7 +3,7 @@ import {Express, Request, Response} from "express";
 import {inject} from "inversify";
 import {TYPE} from "../const";
 import {StateUpdateRequest} from "st-schema";
-import {StConnector} from "../../stConnector";
+import {IDeviceState, StConnector} from "../../stConnector";
 import {MongoService} from "../../mongoService";
 import {OAuth2Model} from "../../OAuth2Model";
 
@@ -46,27 +46,32 @@ class StController extends BaseHttpController {
         @request() req: Request,
         @response() res: Response,
     ) {
-        if (await this.accessTokenIsValid(req, res)) {
+        if (req.header('Authorization') === process.env.AUTH_TOKEN) {
 
             // const device: IDevice | undefined = await this.client.withClient(async (db) => {
             //   const collection = db.collection<IDevice>('my-devices');
             //   return collection.findOne({externalDeviceId: req.body.deviceId});
             // });
 
+            const externalDeviceId = req.body.deviceId;
+
             let value = req.body.value;
             value = !isNaN(Number(value)) ? Number(value) : value;
 
-            const deviceState = [{
-                externalDeviceId: req.body.deviceId,
-                states: [{
-                    component: 'main',
-                    capability: req.body.capability,
-                    attribute: req.body.attribute,
-                    value,
-                }]
-            }];
+            let state: IDeviceState = {
+                component: 'main',
+                capability: req.body.capability,
+                attribute: req.body.attribute,
+                value,
+                unit: req.body.unit,
+                data: req.body.data,
+            };
+            state = await this.st.updateMyState(externalDeviceId, state) ?? state;
 
-            await this.st.updateMyState(deviceState[0].externalDeviceId, deviceState[0].states[0]);
+            const deviceState = [{
+                externalDeviceId,
+                states: [state]
+            }];
 
             const tokens = await this.client.withClient(async (db) => {
                 const collection = db.collection('CallbackAccessTokens');

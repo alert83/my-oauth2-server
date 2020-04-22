@@ -23,18 +23,22 @@ interface ICallbackUrls {
     stateCallback: string;
 }
 
+export interface IDeviceState {
+    component: string;
+    capability: string;
+    attribute: string;
+    value: string | number;
+    unit?: string;
+    data?: any;
+}
+
 export interface IDevice {
     externalDeviceId: string;
     friendlyName: string;
     deviceHandlerType: string;
     manufacturerInfo: { manufacturerName: string, modelName: string };
     status: string;
-    states: {
-        component: string;
-        capability: string;
-        attribute: string;
-        value: string;
-    }[];
+    states: IDeviceState[];
 }
 
 @provideIf(TYPE.StConnector, true)
@@ -93,7 +97,13 @@ export class StConnector {
 
                     Object.entries(byCmp).forEach(([cmp, states]) => {
                         const component = device.addComponent(cmp);
-                        states.forEach((s) => component.addState(s.capability, s.attribute, s.value));
+                        states.forEach((s) => component.addState(
+                            s.capability,
+                            s.attribute,
+                            s.value,
+                            s.unit,
+                            s.data,
+                        ));
                     })
                 });
             })
@@ -115,10 +125,10 @@ export class StConnector {
                     const deviceResponse = response.addDevice(device.externalDeviceId);
 
                     await Bluebird.each(device.commands, async (cmd) => {
-                        const state = this.commandToState(cmd);
+                        let state = this.commandToState(cmd);
 
                         if (state) {
-                            await this.updateMyState(device.externalDeviceId, state);
+                            state = await this.updateMyState(device.externalDeviceId, state) ?? state;
                             deviceResponse.addState(state);
                         } else {
                             deviceResponse.setError(
@@ -175,7 +185,7 @@ export class StConnector {
             })
     }
 
-    async updateMyState(externalDeviceId, state) {
+    async updateMyState(externalDeviceId, state: IDeviceState) {
         const myDevice: IDevice = await this.client.withClient(async (db) => {
             const collection = db.collection<IDevice>('my-devices');
             return await collection.findOne({externalDeviceId});
@@ -186,7 +196,12 @@ export class StConnector {
             s.attribute === state.attribute
         );
 
-        if (!curState || curState.value !== state.value) {
+        if (!curState || (
+            curState.value !== state.value ||
+            curState.unit !== state.unit ||
+            curState.data !== state.data
+        )) {
+            const newState: IDeviceState = {...curState, ...state};
             await this.client.withClient(async (db) => {
                 const collection = db.collection<IDevice>('my-devices');
                 await collection.updateOne(
@@ -195,22 +210,20 @@ export class StConnector {
                         "states.capability": state.capability,
                         "states.attribute": state.attribute,
                     },
-                    {$set: {"states.$": state}}
+                    {$set: {"states.$": newState}}
                 )
             });
 
-            return true;
+            return newState;
         }
-
-        return false;
     }
 
     commandToState(cmd: { component, capability, command, arguments: any[] }) {
-        const state: { component, capability, attribute, value } = {
+        const state: IDeviceState = {
             component: cmd.component,
             capability: cmd.capability,
-            attribute: undefined,
-            value: undefined,
+            attribute: '',
+            value: '',
         };
 
         switch (cmd.capability) {
