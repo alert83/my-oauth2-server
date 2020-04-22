@@ -63,7 +63,7 @@ class StController extends BaseHttpController {
 
             const devices: any[] = req.body.devices ?? [];
             const deviceState: { externalDeviceId, states: IDeviceState[] }[] =
-                await Bluebird.each(devices, async (d) => {
+                await Bluebird.mapSeries(devices, async (d) => {
                     const externalDeviceId: string = d.deviceId;
                     let states: IDeviceState[] = d.states;
 
