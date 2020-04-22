@@ -99,13 +99,16 @@ export class StConnector {
 
                     Object.entries(byCmp).forEach(([cmp, states]) => {
                         const component = device.addComponent(cmp);
-                        states.forEach((s) => component.addState(
-                            s.capability,
-                            s.attribute,
-                            s.value,
-                            s.unit || undefined,
-                            s.data || undefined,
-                        ));
+                        states.forEach((s) => {
+                            s = compact(s);
+                            component.addState(
+                                s.capability,
+                                s.attribute,
+                                s.value,
+                                s.unit,
+                                s.data,
+                            );
+                        });
                     })
                 });
             })
