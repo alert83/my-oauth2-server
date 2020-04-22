@@ -92,6 +92,8 @@ class StController extends BaseHttpController {
             }
 
             res.end();
+        } else {
+            res.status(401).send('Unauthorized');
         }
     }
 }
