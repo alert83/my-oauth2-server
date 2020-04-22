@@ -49,7 +49,7 @@ class StController extends BaseHttpController {
     ) {
         console.log(req.headers);
 
-        if (req.header('Authorization') === process.env.AUTH_TOKEN) {
+        if (req.header('authorization') === process.env.AUTH_TOKEN) {
 
             // const device: IDevice | undefined = await this.client.withClient(async (db) => {
             //   const collection = db.collection<IDevice>('my-devices');
