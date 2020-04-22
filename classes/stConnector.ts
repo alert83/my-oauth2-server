@@ -101,8 +101,8 @@ export class StConnector {
                             s.capability,
                             s.attribute,
                             s.value,
-                            s.unit,
-                            s.data,
+                            s.unit || undefined,
+                            s.data || undefined,
                         ));
                     })
                 });
@@ -129,6 +129,11 @@ export class StConnector {
 
                         if (state) {
                             state = await this.updateMyState(device.externalDeviceId, state) ?? state;
+                            state = {
+                                ...state,
+                                unit: state.unit || undefined,
+                                data: state.data || undefined
+                            }
                             deviceResponse.addState(state);
                         } else {
                             deviceResponse.setError(
@@ -201,7 +206,12 @@ export class StConnector {
             curState.unit !== state.unit ||
             curState.data !== state.data
         )) {
-            const newState: IDeviceState = {...curState, ...state};
+            let newState: IDeviceState = {...curState, ...state};
+            newState = {
+                ...newState,
+                unit: newState.unit || undefined,
+                data: newState.data || undefined,
+            };
             await this.client.withClient(async (db) => {
                 const collection = db.collection<IDevice>('my-devices');
                 await collection.updateOne(

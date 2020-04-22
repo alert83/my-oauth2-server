@@ -63,8 +63,8 @@ class StController extends BaseHttpController {
                 capability: req.body.capability,
                 attribute: req.body.attribute,
                 value,
-                unit: req.body.unit,
-                data: req.body.data,
+                unit: req.body.unit || undefined,
+                data: req.body.data || undefined,
             };
             state = await this.st.updateMyState(externalDeviceId, state) ?? state;
 
