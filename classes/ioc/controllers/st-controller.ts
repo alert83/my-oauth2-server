@@ -47,6 +47,8 @@ class StController extends BaseHttpController {
         @request() req: Request,
         @response() res: Response,
     ) {
+        console.log(req.headers);
+
         if (req.header('x-authorization') === process.env.AUTH_TOKEN) {
 
             // const device: IDevice | undefined = await this.client.withClient(async (db) => {
