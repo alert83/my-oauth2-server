@@ -47,7 +47,7 @@ class StController extends BaseHttpController {
         @request() req: Request,
         @response() res: Response,
     ) {
-        console.log(req.headers, req.header('x-authorization'), process.env.AUTH_TOKEN);
+        console.log(req.headers, req.header('x-authorization') === process.env.AUTH_TOKEN);
 
         if (req.header('x-authorization') === process.env.AUTH_TOKEN) {
 
@@ -93,10 +93,10 @@ class StController extends BaseHttpController {
                     deviceState,
                 );
             }
-
             res.end();
         } else {
             res.status(401).send('Unauthorized');
+            res.end();
         }
     }
 }
