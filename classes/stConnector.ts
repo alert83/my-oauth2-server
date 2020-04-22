@@ -84,11 +84,11 @@ export class StConnector {
             .stateRefreshHandler(async (accessToken: string, response, data) => {
                 // console.log('stateRefreshHandler =>', accessToken, data);
 
-                const ids = data.devices ? data.devices.map((d) => d.externalDeviceId) : undefined;
-
+                // const ids = data.devices ? data.devices.map((d) => d.externalDeviceId) : undefined;
                 const devices: IDevice[] = await this.client.withClient(async (db) => {
                     const collection = db.collection<IDevice>('my-devices');
-                    return collection.find(ids ? {externalDeviceId: {$in: ids}} : {}).toArray();
+                    // return collection.find(ids ? {externalDeviceId: {$in: ids}} : {}).toArray();
+                    return collection.find().toArray();
                 });
 
                 devices.forEach((d) => {
