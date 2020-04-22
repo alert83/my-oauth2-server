@@ -100,8 +100,7 @@ class StController extends BaseHttpController {
                     deviceState,
                 );
             }
-            res.status(200);
-            res.end();
+            res.status(200).send({});
         }
     }
 }
