@@ -9,6 +9,7 @@ import {StConnector} from "./stConnector";
 
 export async function wdProcess(app: Application) {
     const secs = Number(process.env.TIMEOUT_SEC || 5);
+    console.log(secs);
 
     setInterval(async () => {
         const last: Date = app.get('last reset');
