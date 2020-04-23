@@ -6,6 +6,7 @@ import './controllers/common'
 import './controllers/st-controller'
 import './controllers/wd-controller'
 //
-import '../mongoService'
 import '../OAuth2Model'
 import '../stConnector'
+import '../mongoService'
+import '../watchDogService'
