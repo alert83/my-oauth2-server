@@ -4,6 +4,7 @@
 // import './controllers/foo-controller'
 import './controllers/common'
 import './controllers/st-controller'
+import './controllers/wd-controller'
 //
 import '../mongoService'
 import '../OAuth2Model'

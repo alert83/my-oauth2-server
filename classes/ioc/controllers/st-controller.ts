@@ -8,6 +8,7 @@ import {MongoService} from "../../mongoService";
 import {OAuth2Model} from "../../OAuth2Model";
 import {compact} from "../../utils";
 import Bluebird from "bluebird";
+import {xAuthIsValid} from "../middlewares";
 
 @controller('/st')
 class StController extends BaseHttpController {
@@ -43,74 +44,61 @@ class StController extends BaseHttpController {
         }
     }
 
-    private async xAuthIsValid(req: Request, res: Response) {
-        if (req.header('x-authorization') === process.env.AUTH_TOKEN) {
-            return true;
-        }
-
-        res.status(401).send('Unauthorized');
-        return false;
-    }
-
-    @httpPost('/command')
+    @httpPost('/command', xAuthIsValid)
     private async command(
         @request() req: Request,
         @response() res: Response,
     ) {
-        if (await this.xAuthIsValid(req, res)) {
+        // console.log(req.body);
 
-            console.log(req.body);
+        const devices: any[] = req.body.devices ?? [];
+        const deviceState: { externalDeviceId, states: IDeviceState[] }[] =
+            await Bluebird.mapSeries(devices, async (d) => {
+                const externalDeviceId: string = d.deviceId;
+                let states: IDeviceState[] = d.states;
+                states = await Bluebird.mapSeries(states, async (s) => {
+                    let value = s.value;
+                    value = !isNaN(Number(value)) ? Number(value) : value;
 
-            const devices: any[] = req.body.devices ?? [];
-            const deviceState: { externalDeviceId, states: IDeviceState[] }[] =
-                await Bluebird.mapSeries(devices, async (d) => {
-                    const externalDeviceId: string = d.deviceId;
-                    let states: IDeviceState[] = d.states;
+                    const state: IDeviceState = compact({
+                        component: 'main',
+                        capability: s.capability,
+                        attribute: s.attribute,
+                        value,
+                        unit: s.unit,
+                        data: s.data,
+                    });
+                    return compact(await this.st.updateMyState(externalDeviceId, state) ?? state);
+                })
 
-                    states = await Bluebird.mapSeries(states, async (s) => {
-                        let value = s.value;
-                        value = !isNaN(Number(value)) ? Number(value) : value;
-
-                        const state: IDeviceState = compact({
-                            component: 'main',
-                            capability: s.capability,
-                            attribute: s.attribute,
-                            value,
-                            unit: s.unit,
-                            data: s.data,
-                        });
-                        return compact(await this.st.updateMyState(externalDeviceId, state) ?? state);
-                    })
-
-                    return {externalDeviceId, states};
-                });
-
-            console.log(deviceState);
-
-            const tokens = await this.client.withClient(async (db) => {
-                const collection = db.collection('CallbackAccessTokens');
-                return await collection
-                    .find({"callbackAuthentication.expiresAt": {$gte: new Date()}})
-                    .sort({_id: -1})
-                    .toArray();
+                return {externalDeviceId, states};
             });
 
-            await Promise.all(
-                tokens.map(async (token) => {
-                    const stateUpdateRequest = new StateUpdateRequest(
-                        process.env.ST_CLIENT_ID,
-                        process.env.ST_CLIENT_SECRET,
-                    );
+        // console.log(deviceState);
 
-                    await stateUpdateRequest.updateState(
-                        token.callbackUrls,
-                        token.callbackAuthentication,
-                        deviceState,
-                    );
-                })
-            );
+        const tokens = await this.client.withClient(async (db) => {
+            const collection = db.collection('CallbackAccessTokens');
+            return await collection
+                .find({"callbackAuthentication.expiresAt": {$gte: new Date()}})
+                .sort({_id: -1})
+                .toArray();
+        });
 
-            res.send(true);
-        }
+        await Promise.all(
+            tokens.map(async (token) => {
+                const stateUpdateRequest = new StateUpdateRequest(
+                    process.env.ST_CLIENT_ID,
+                    process.env.ST_CLIENT_SECRET,
+                );
+
+                await stateUpdateRequest.updateState(
+                    token.callbackUrls,
+                    token.callbackAuthentication,
+                    deviceState,
+                );
+            })
+        );
+
+        res.send(true);
     }
 }
