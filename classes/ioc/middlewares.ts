@@ -8,11 +8,7 @@ const OAuth2Request = OAuth2Server.Request;
 const OAuth2Response = OAuth2Server.Response;
 
 export function authorizeHandler(options?: AuthorizeOptions) {
-    return (
-        req: Request,
-        res: Response,
-        next: NextFunction,
-    ) => {
+    return (req: Request, res: Response, next: NextFunction) => {
         const oAuth2: OAuth2Server = req.app.get('oauth2');
 
         return oAuth2.authorize(new OAuth2Request(req), new OAuth2Response(res), options)
@@ -25,11 +21,7 @@ export function authorizeHandler(options?: AuthorizeOptions) {
 }
 
 export function authenticateHandler(options?: AuthenticateOptions) {
-    return (
-        req: Request,
-        res: Response,
-        next: NextFunction,
-    ) => {
+    return (req: Request, res: Response, next: NextFunction) => {
         const oAuth2: OAuth2Server = req.app.get('oauth2');
 
         return oAuth2.authenticate(new OAuth2Request(req), new OAuth2Response(res), options)
@@ -42,11 +34,7 @@ export function authenticateHandler(options?: AuthenticateOptions) {
 }
 
 export function tokenHandler(options?: TokenOptions) {
-    return (
-        req: Request,
-        res: Response,
-        next: NextFunction,
-    ) => {
+    return (req: Request, res: Response, next: NextFunction) => {
         const oAuth2: OAuth2Server = req.app.get('oauth2');
 
         return oAuth2.token(new OAuth2Request(req), new OAuth2Response(res), options)
@@ -59,11 +47,7 @@ export function tokenHandler(options?: TokenOptions) {
 }
 
 export function loginHandler() {
-    return async (
-        req: Request,
-        res: Response,
-        next: NextFunction,
-    ) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
         try {
             const container: Container = req.app.get('ioc container');
             const model = container.get<OAuth2Model>(TYPE.OAuth2Model);
