@@ -15,6 +15,8 @@ export async function wdProcess(app: Application) {
         const last: Date = app.get('last reset');
         const diff = moment().diff(moment(last), 'seconds');
 
+        console.log(diff);
+
         if (diff > secs) {
             console.log('timeout');
             await sendState('detected', app);
