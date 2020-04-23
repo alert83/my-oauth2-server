@@ -17,7 +17,7 @@ import './classes/ioc/loader';
 //
 import OAuth2Server from "oauth2-server";
 import {OAuth2Model} from "./classes/OAuth2Model";
-import {reset} from "./classes/watchDogService";
+import {wdProcess} from "./classes/watchDogService";
 
 config();
 
@@ -49,8 +49,9 @@ server.setConfig((_app) => {
         .set('oauth2', new OAuth2Server({model: container.get<OAuth2Model>(TYPE.OAuth2Model)}))
         .set('views', join(__dirname, 'views'))
         .set('view engine', 'ejs')
+        .set('last reset', new Date())
     ;
 });
 server.build();
 app.listen(PORT, () => console.log(`Listening on ${PORT}`));
-reset(app, true);
+wdProcess(app).catch(console.error);

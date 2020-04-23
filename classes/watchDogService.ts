@@ -1,21 +1,30 @@
 import {createTransport} from "nodemailer";
 import SMTPConnection from "nodemailer/lib/smtp-connection";
-import requestPromise from "request-promise";
 import {Application} from "express";
+import moment from "moment";
+import {Container} from "inversify";
+import {TYPE} from "./ioc/const";
+import {StConnector} from "./stConnector";
 
-export function reset(app: Application, initial = false) {
-    !initial && clearTimeout(app.get('timeoutId'));
-    app.set('timeoutId', setTimeout(async () => {
-        await onTimeOut().catch();
-        console.log('run again');
-        reset(app);
-    }, Number(process.env.TIMEOUT_SEC || 5) * 1000));
+
+export async function wdProcess(app: Application) {
+    const secs = Number(process.env.TIMEOUT_SEC || 5);
+
+    setInterval(async () => {
+        const last: Date = app.get('last reset');
+        const diff = moment().diff(moment(last), 'seconds');
+
+        if (diff > secs) {
+            await sendState('detected', app);
+            await onTimeOut().catch();
+        } else {
+            await sendState('clear', app);
+        }
+    }, secs * 1000);
 }
 
 export async function onTimeOut() {
     console.log('timeout');
-
-    await sendState('detected');
 
     const transporter = createTransport({
         host: process.env.SMTP_HOST,
@@ -41,27 +50,17 @@ export async function onTimeOut() {
     return info;
 }
 
-export async function sendState(value) {
-    await requestPromise({
-        method: 'POST',
-        uri: 'https://my-oauth2-server.herokuapp.com/st/command',
-        headers: {'x-authorization': process.env.AUTH_TOKEN},
-        body: {
-            "devices": [{
-                "deviceId": process.env.WATCH_DOG_ID,
-                "states": [{
-                    "capability": "st.tamperAlert",
-                    "attribute": "tamper",
-                    "value": value,
-                }]
-            }]
-        },
-        json: true
-    })
-        .then(res => {
-            console.log(res);
-        })
-        .catch(err => {
-            console.error(err);
-        });
+export async function sendState(value, app: Application) {
+
+    const container: Container = app.get('ioc container');
+    const st = container.get<StConnector>(TYPE.StConnector);
+
+    await st.setStates([{
+        "deviceId": process.env.WATCH_DOG_ID,
+        "states": [{
+            "capability": "st.tamperAlert",
+            "attribute": "tamper",
+            "value": value,
+        }]
+    }]);
 }
