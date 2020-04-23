@@ -12,7 +12,7 @@ export class WatchDogService {
     constructor() {
     }
 
-    reset() {
+    static reset() {
         WatchDogService.timeoutId && clearTimeout(WatchDogService.timeoutId);
         WatchDogService.timeoutId = setTimeout(async () => {
             await this.onTimeOut();
@@ -21,7 +21,7 @@ export class WatchDogService {
         }, Number(process.env.TIMEOUT_SEC || 5) * 1000);
     }
 
-    async onTimeOut() {
+    static async onTimeOut() {
         console.log('timeout');
 
         await this.sendState('detected');
@@ -50,7 +50,7 @@ export class WatchDogService {
         return info;
     }
 
-    async sendState(value) {
+    static async sendState(value) {
         await requestPromise({
             method: 'POST',
             uri: 'https://my-oauth2-server.herokuapp.com/st/command',
@@ -76,3 +76,4 @@ export class WatchDogService {
     }
 }
 
+WatchDogService.reset();
