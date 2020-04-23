@@ -44,7 +44,7 @@ class StController extends BaseHttpController {
         }
     }
 
-    @httpPost('/command', xAuthIsValid)
+    @httpPost('/command', xAuthIsValid())
     private async command(
         @request() req: Request,
         @response() res: Response,

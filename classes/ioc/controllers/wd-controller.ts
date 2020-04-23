@@ -14,7 +14,7 @@ class WdController extends BaseHttpController {
         super();
     }
 
-    @httpGet('/', xAuthIsValid)
+    @httpGet('/', xAuthIsValid())
     public async root(
         @request() req: Request,
         @response() res: Response,
@@ -22,7 +22,7 @@ class WdController extends BaseHttpController {
 
         console.log('reset');
         // this.wd.reset();
-        await this.wd.sendState('clear');
+        // await this.wd.sendState('clear');
 
         return res.status(200).send(true);
     }
