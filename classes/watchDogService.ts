@@ -15,7 +15,7 @@ export async function wdProcess(app: Application) {
         const last: Date = app.get('last reset');
         const diff = moment().diff(moment(last), 'seconds');
 
-        console.log(diff);
+        // console.log(diff);
 
         if (diff > secs) {
             console.log('timeout');
@@ -54,7 +54,7 @@ export async function onTimeOut() {
 }
 
 export async function sendState(value, app: Application) {
-    console.log(value);
+    // console.log(value);
 
     const container: Container = app.get('ioc container');
     const st = container.get<StConnector>(TYPE.StConnector);
