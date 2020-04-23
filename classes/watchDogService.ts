@@ -18,7 +18,7 @@ export class WatchDogService {
             await this.onTimeOut();
             console.log('run again');
             this.reset();
-        }, Number(process.env.TIMEOUT_SEC ?? 5) * 1000);
+        }, Number(process.env.TIMEOUT_SEC || 5) * 1000);
     }
 
     async onTimeOut() {
