@@ -66,5 +66,3 @@ export async function sendState(value) {
             console.error(err);
         });
 }
-
-reset();

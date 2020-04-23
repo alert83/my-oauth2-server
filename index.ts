@@ -17,6 +17,7 @@ import './classes/ioc/loader';
 //
 import OAuth2Server from "oauth2-server";
 import {OAuth2Model} from "./classes/OAuth2Model";
+import {reset} from "./classes/watchDogService";
 
 config();
 
@@ -52,3 +53,4 @@ server.setConfig((_app) => {
 });
 server.build();
 app.listen(PORT, () => console.log(`Listening on ${PORT}`));
+reset();
