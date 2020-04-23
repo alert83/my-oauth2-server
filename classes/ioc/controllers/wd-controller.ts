@@ -12,6 +12,7 @@ class WdController extends BaseHttpController {
         @inject(TYPE.WatchDogService) private readonly wd: WatchDogService,
     ) {
         super();
+        this.wd.reset();
     }
 
     @httpGet('/', xAuthIsValid())
