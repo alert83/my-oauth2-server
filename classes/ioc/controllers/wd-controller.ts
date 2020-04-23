@@ -5,9 +5,10 @@ import {createTransport} from "nodemailer";
 import SMTPConnection from "nodemailer/lib/smtp-connection";
 import requestPromise from "request-promise";
 
+let timeoutId;
+
 @controller('/wd')
 class WdController extends BaseHttpController {
-    private timeoutId;
 
     @httpGet('', xAuthIsValid)
     public async root(
@@ -23,8 +24,8 @@ class WdController extends BaseHttpController {
     }
 
     private reset() {
-        this.timeoutId && clearTimeout(this.timeoutId);
-        this.timeoutId = setTimeout(async () => {
+        timeoutId && clearTimeout(timeoutId);
+        timeoutId = setTimeout(async () => {
             await this.onTimeOut();
             console.log('run again');
             this.reset();
