@@ -1,16 +1,16 @@
 import {createTransport} from "nodemailer";
 import SMTPConnection from "nodemailer/lib/smtp-connection";
 import requestPromise from "request-promise";
+import {Application} from "express";
 
-let timeoutId;
-
-export function reset() {
+export function reset(app: Application) {
+    const timeoutId = app.get('timeoutId');
     timeoutId && clearTimeout(timeoutId);
-    timeoutId = setTimeout(async () => {
+    app.set('timeoutId', setTimeout(async () => {
         await onTimeOut().catch();
         console.log('run again');
-        reset();
-    }, Number(process.env.TIMEOUT_SEC || 5) * 1000);
+        reset(app);
+    }, Number(process.env.TIMEOUT_SEC || 5) * 1000));
 }
 
 export async function onTimeOut() {

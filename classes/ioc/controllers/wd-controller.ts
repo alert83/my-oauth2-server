@@ -12,7 +12,7 @@ class WdController extends BaseHttpController {
         @response() res: Response,
     ) {
         console.log('reset');
-        reset();
+        reset(req.app);
         await sendState('clear');
 
         return res.status(200).send(true).end();
