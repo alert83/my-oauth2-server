@@ -6,15 +6,15 @@ import requestPromise from "request-promise";
 
 @provideIf(TYPE.WatchDogService, true)
 export class WatchDogService {
-    private timeoutId;
+    private static timeoutId;
 
     // tslint:disable-next-line:no-empty
     constructor() {
     }
 
     reset() {
-        this.timeoutId && clearTimeout(this.timeoutId);
-        this.timeoutId = setTimeout(async () => {
+        WatchDogService.timeoutId && clearTimeout(WatchDogService.timeoutId);
+        WatchDogService.timeoutId = setTimeout(async () => {
             await this.onTimeOut();
             console.log('run again');
             this.reset();
