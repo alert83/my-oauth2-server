@@ -20,7 +20,7 @@ class WdController extends BaseHttpController {
         this.reset();
         await this.sendState('clear');
 
-        return this.ok('test');
+        return this.ok(true);
     }
 
     private reset() {
