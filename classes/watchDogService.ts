@@ -23,7 +23,7 @@ export async function wdProcess(app: Application) {
             console.log('clear');
             await sendState('clear', app);
         }
-    }, 5 * 1000);
+    }, 10 * 1000);
 }
 
 export async function onTimeOut() {
