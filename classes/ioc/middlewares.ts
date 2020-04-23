@@ -79,8 +79,8 @@ export function loginHandler() {
 
 export function xAuthIsValid(req: Request, res: Response, next: NextFunction) {
     const token = req.header('x-authorization');
-    if (!token) return res.status(401).send("Access denied. No token provided.");
-    if (token !== process.env.AUTH_TOKEN) return res.status(400).send("Invalid token.");
+    if (!token) return res.status(401).send("Access denied. No token provided.").end();
+    if (token !== process.env.AUTH_TOKEN) return res.status(400).send("Invalid token.").end();
 
     next();
 }

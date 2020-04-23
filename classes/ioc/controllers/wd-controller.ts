@@ -21,10 +21,10 @@ class WdController extends BaseHttpController {
     ) {
 
         console.log('reset');
-        this.wd.reset();
-        await this.wd.sendState('clear');
+        // this.wd.reset();
+        // await this.wd.sendState('clear');
 
-        return this.ok(true);
+        return res.status(200).send(true);
     }
 
 }
