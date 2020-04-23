@@ -21,7 +21,7 @@ export async function wdProcess(app: Application) {
         } else {
             await sendState('clear', app);
         }
-    }, secs * 1000);
+    }, 5 * 1000);
 }
 
 export async function onTimeOut() {
