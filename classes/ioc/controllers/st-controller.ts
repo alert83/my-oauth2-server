@@ -99,6 +99,6 @@ class StController extends BaseHttpController {
             })
         );
 
-        res.send(true);
+        res.status(200).send(true);
     }
 }
