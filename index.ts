@@ -53,4 +53,4 @@ server.setConfig((_app) => {
 });
 server.build();
 app.listen(PORT, () => console.log(`Listening on ${PORT}`));
-reset(app);
+reset(app, true);
