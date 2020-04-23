@@ -54,6 +54,7 @@ export async function onTimeOut() {
 }
 
 export async function sendState(value, app: Application) {
+    console.log(value);
 
     const container: Container = app.get('ioc container');
     const st = container.get<StConnector>(TYPE.StConnector);
