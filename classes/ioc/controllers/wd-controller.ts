@@ -1,7 +1,7 @@
 import {BaseHttpController, controller, httpGet, request, response} from 'inversify-express-utils';
 import {Request, Response} from "express";
 import {xAuthIsValid} from "../middlewares";
-import {WatchDogService} from "../../watchDogService";
+import {reset, sendState} from "../../watchDogService";
 
 @controller('/wd')
 class WdController extends BaseHttpController {
@@ -12,8 +12,8 @@ class WdController extends BaseHttpController {
         @response() res: Response,
     ) {
         console.log('reset');
-        WatchDogService.reset();
-        await WatchDogService.sendState('clear');
+        reset();
+        await sendState('clear');
 
         return res.status(200).send(true).end();
     }
