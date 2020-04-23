@@ -16,17 +16,17 @@ export async function wdProcess(app: Application) {
         const diff = moment().diff(moment(last), 'seconds');
 
         if (diff > secs) {
+            console.log('timeout');
             await sendState('detected', app);
             await onTimeOut().catch();
         } else {
+            console.log('clear');
             await sendState('clear', app);
         }
     }, 5 * 1000);
 }
 
 export async function onTimeOut() {
-    console.log('timeout');
-
     const transporter = createTransport({
         host: process.env.SMTP_HOST,
         port: process.env.SMTP_PORT ?? 465,
