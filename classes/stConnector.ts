@@ -293,7 +293,8 @@ export class StConnector {
         const tokens = await this.client.withClient(async (db) => {
             const collection = db.collection('CallbackAccessTokens');
             return await collection
-                .find({"callbackAuthentication.expiresAt": {$gte: new Date()}})
+                // .find({"callbackAuthentication.expiresAt": {$gte: new Date()}})
+                .find()
                 .sort({_id: -1})
                 .toArray();
         });
@@ -309,7 +310,7 @@ export class StConnector {
                     token.callbackUrls,
                     token.callbackAuthentication,
                     deviceState,
-                );
+                ).catch();
             })
         );
     }
