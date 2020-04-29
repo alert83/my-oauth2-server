@@ -310,9 +310,9 @@ export class StConnector {
                     token.callbackUrls,
                     token.callbackAuthentication,
                     deviceState,
-                ).catch();
+                );
             })
-        );
+        ).catch((err) => console.error(err.message));
     }
 }
 

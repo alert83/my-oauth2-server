@@ -20,7 +20,7 @@ export async function wdProcess(app: Application) {
         if (diff > secs) {
             console.log('timeout');
             await sendState('detected', app);
-            await onTimeOut().catch();
+            await onTimeOut().catch((err) => console.error(err.message));
         } else {
             console.log('clear');
             await sendState('clear', app);
