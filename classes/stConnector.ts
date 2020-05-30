@@ -111,7 +111,7 @@ export class StConnector {
                             component.addState(
                                 s.capability,
                                 s.attribute,
-                                s.value,
+                                s.value ?? undefined,
                                 s.unit ?? undefined,
                                 s.data ?? undefined,
                             );
