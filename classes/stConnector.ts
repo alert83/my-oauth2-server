@@ -8,7 +8,7 @@ import {OAuth2Model} from "./OAuth2Model";
 import {Token} from "oauth2-server";
 import groupBy from "lodash/groupBy";
 import Bluebird from "bluebird";
-import { merge } from "lodash";
+import {merge, fromPairs} from "lodash";
 import {compact} from "./utils";
 import moment from "moment";
 
@@ -66,7 +66,7 @@ export class StConnector {
              * @response {DiscoveryResponse} Discovery response object
              */
             .discoveryHandler(async (accessToken: string, response, data) => {
-                // console.log('discoveryHandler =>', accessToken, data);
+                console.log('discoveryHandler =>', accessToken, data);
 
                 const devices: IDevice[] = await this.client.withClient(async (db) => {
                     const collection = db.collection<IDevice>('my-devices');
@@ -87,7 +87,7 @@ export class StConnector {
              * @response {StateRefreshResponse} StateRefresh response object
              */
             .stateRefreshHandler(async (accessToken: string, response, data) => {
-                // console.log('stateRefreshHandler =>', accessToken, data);
+                console.log('stateRefreshHandler =>', accessToken, data);
 
                 // const ids = data.devices ? data.devices.map((d) => d.externalDeviceId) : undefined;
                 const devices: IDevice[] = await this.client.withClient(async (db) => {
@@ -126,8 +126,9 @@ export class StConnector {
                 accessToken: string,
                 response,
                 devices: { externalDeviceId, commands: { component, capability, command, arguments: any[] }[] }[],
-                data) => {
-                // console.log('commandHandler =>', accessToken, devices, data);
+                data,
+            ) => {
+                console.log('commandHandler =>', accessToken, devices, data);
 
                 await Bluebird.each(devices, async (device) => {
                     const deviceResponse = response.addDevice(device.externalDeviceId);
@@ -137,7 +138,14 @@ export class StConnector {
 
                         if (state) {
                             state = compact(await this.updateMyState(device.externalDeviceId, state) ?? state);
-                            deviceResponse.addState(state);
+                            if (state) {
+                                deviceResponse.addState(
+                                    fromPairs(
+                                        ['capability', 'attribute', 'value', 'unit', 'data']
+                                            .map((k) => [k, (state as any)[k]])
+                                    )
+                                );
+                            }
                         } else {
                             deviceResponse.setError(
                                 `Command '${cmd.command} of capability '${cmd.capability}' not supported`,
@@ -159,7 +167,7 @@ export class StConnector {
                                           callbackAuthentication: ICallbackAuthentication,
                                           callbackUrls: ICallbackUrls,
                                           data) => {
-                // console.log('callbackAccessHandler =>', accessToken, data);
+                console.log('callbackAccessHandler =>', accessToken, data);
 
                 await this.client.withClient(async (db) => {
                     const collection = db.collection('CallbackAccessTokens');
