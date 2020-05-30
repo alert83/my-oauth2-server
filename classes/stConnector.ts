@@ -141,7 +141,7 @@ export class StConnector {
                             if (state) {
                                 deviceResponse.addState(
                                     fromPairs(
-                                        ['capability', 'attribute', 'value', 'unit', 'data']
+                                        ['component', 'capability', 'attribute', 'value', 'unit', 'data']
                                             .map((k) => [k, (state as any)[k]])
                                     )
                                 );
