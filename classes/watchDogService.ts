@@ -9,7 +9,7 @@ import {StConnector} from "./stConnector";
 
 export async function wdProcess(app: Application) {
     const secs = Number(process.env.TIMEOUT_SEC || 5);
-    console.log(secs);
+    // console.log(secs);
 
     setInterval(async () => {
         const last: Date = app.get('last reset');
@@ -18,11 +18,11 @@ export async function wdProcess(app: Application) {
         // console.log(diff);
 
         if (diff > secs) {
-            console.log('timeout');
+            // console.log('timeout');
             await sendState('detected', app);
             await sendAlertEmail().catch((err) => console.error(err.message));
         } else {
-            console.log('clear');
+            // console.log('clear');
             await sendState('clear', app);
         }
     }, 10 * 1000);

@@ -10,7 +10,7 @@ class WdController extends BaseHttpController {
         @request() req: Request,
         @response() res: Response,
     ) {
-        console.log('reset');
+        // console.log('reset');
         req.app.set('last reset', new Date());
         return res.status(200).send(true).end();
     }
