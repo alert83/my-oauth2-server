@@ -20,7 +20,7 @@ export async function wdProcess(app: Application) {
         if (diff > secs) {
             console.log('timeout');
             await sendState('detected', app);
-            await onTimeOut().catch((err) => console.error(err.message));
+            await sendAlertEmail().catch((err) => console.error(err.message));
         } else {
             console.log('clear');
             await sendState('clear', app);
@@ -28,7 +28,7 @@ export async function wdProcess(app: Application) {
     }, 10 * 1000);
 }
 
-export async function onTimeOut() {
+export async function sendAlertEmail() {
     const transporter = createTransport({
         host: process.env.SMTP_HOST,
         port: process.env.SMTP_PORT ?? 465,
