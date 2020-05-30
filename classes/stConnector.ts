@@ -112,8 +112,8 @@ export class StConnector {
                                 s.capability,
                                 s.attribute,
                                 s.value,
-                                s.unit,
-                                s.data,
+                                s.unit ?? undefined,
+                                s.data ?? undefined,
                             );
                         });
                     })
