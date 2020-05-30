@@ -8,7 +8,7 @@ import {OAuth2Model} from "./OAuth2Model";
 import {Token} from "oauth2-server";
 import groupBy from "lodash/groupBy";
 import Bluebird from "bluebird";
-import {merge, fromPairs} from "lodash";
+import {fromPairs, merge} from "lodash";
 import {compact} from "./utils";
 import moment from "moment";
 
@@ -86,14 +86,18 @@ export class StConnector {
              * @accessToken External cloud access token
              * @response {StateRefreshResponse} StateRefresh response object
              */
-            .stateRefreshHandler(async (accessToken: string, response, data) => {
+            .stateRefreshHandler(async (accessToken: string, response, data: {
+                headers: { schema, version, interactionType, requestId },
+                authentication: { tokenType, token },
+                devices: { externalDeviceId }[],
+            }) => {
                 console.log('stateRefreshHandler =>', accessToken, data);
 
-                // const ids = data.devices ? data.devices.map((d) => d.externalDeviceId) : undefined;
+                const ids = data.devices ? data.devices.map((d) => d.externalDeviceId) : undefined;
                 const devices: IDevice[] = await this.client.withClient(async (db) => {
                     const collection = db.collection<IDevice>('my-devices');
-                    // return collection.find(ids ? {externalDeviceId: {$in: ids}} : {}).toArray();
-                    return collection.find().toArray();
+                    return collection.find(ids ? {externalDeviceId: {$in: ids}} : {}).toArray();
+                    // return collection.find().toArray();
                 });
 
                 devices.forEach((d) => {
