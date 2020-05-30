@@ -65,7 +65,10 @@ export class StConnector {
              * @accessToken External cloud access token
              * @response {DiscoveryResponse} Discovery response object
              */
-            .discoveryHandler(async (accessToken: string, response, data) => {
+            .discoveryHandler(async (accessToken: string, response, data: {
+                headers: { schema, version, interactionType, requestId },
+                authentication: { tokenType, token },
+            }) => {
                 console.log('discoveryHandler =>', accessToken, data);
 
                 const devices: IDevice[] = await this.client.withClient(async (db) => {
@@ -74,6 +77,8 @@ export class StConnector {
                 });
 
                 devices.forEach((d) => {
+                    console.log('device:', d.friendlyName);
+
                     response.addDevice(d.externalDeviceId, d.friendlyName, d.deviceHandlerType)
                         .manufacturerName(d?.manufacturerInfo?.manufacturerName)
                         .modelName(d?.manufacturerInfo?.modelName);
@@ -101,6 +106,8 @@ export class StConnector {
                 });
 
                 devices.forEach((d) => {
+                    console.log('device:', d.friendlyName);
+
                     const device = response.addDevice(d.externalDeviceId);
                     const byCmp = groupBy(d.states, (s) => s.component);
 
