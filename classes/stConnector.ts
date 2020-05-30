@@ -324,6 +324,22 @@ export class StConnector {
                     token.callbackUrls,
                     token.callbackAuthentication,
                     deviceState,
+                    async (callbackAuthentication) => {
+                        const accessToken = token.accessToken
+                        await this.client.withClient(async (db) => {
+                            const collection = db.collection('CallbackAccessTokens');
+
+                            await collection.findOneAndUpdate({
+                                accessToken,
+                            }, {
+                                callbackAuthentication: {
+                                    ...callbackAuthentication,
+                                    expiresAt: moment().add(callbackAuthentication.expiresIn, "seconds").toDate(),
+                                },
+                                // ctime: new Date(),
+                            }, {});
+                        });
+                    },
                 );
             })
         ).catch((err) => console.error(err.message));
