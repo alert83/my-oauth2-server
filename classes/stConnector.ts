@@ -314,6 +314,8 @@ export class StConnector {
                     process.env.ST_CLIENT_SECRET,
                 );
 
+                console.log('updateState');
+
                 await stateUpdateRequest.updateState(
                     token.callbackUrls,
                     token.callbackAuthentication,
