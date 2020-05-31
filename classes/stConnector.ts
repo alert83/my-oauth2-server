@@ -34,6 +34,7 @@ export interface IDeviceState {
     value: string | number;
     unit?: string | null;
     data?: any | null;
+    timestamp?: number;
     cdate?: Date;
 }
 
@@ -316,6 +317,7 @@ export class StConnector {
                         value,
                         unit: s.unit ?? null,
                         data: s.data ?? null,
+                        timestamp: new Date().getTime()
                     });
                     return compact(await this.updateMyState(externalDeviceId, state) ?? state);
                 })
