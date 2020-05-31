@@ -51,7 +51,15 @@ export interface IDevice {
 export class StConnector {
     public connector: any;
 
-    stateFields = ['component', 'capability', 'attribute', 'value', 'unit', 'data', 'timestamp'];
+    stateFields = [
+        'component',
+        'capability',
+        'attribute',
+        'value',
+        'unit',
+        'data',
+        // 'timestamp',
+    ];
 
     constructor(
         @inject(TYPE.Application) private readonly app: Express,
@@ -252,7 +260,9 @@ export class StConnector {
 
                 const idx = myDevice.states.findIndex((s) =>
                     state.capability === s.capability && state.attribute === s.attribute)
+
                 if (idx >= 0) myDevice.states.splice(idx, 1, newState);
+                else myDevice.states.push(newState);
 
                 await collection.updateOne(
                     {externalDeviceId},
