@@ -344,6 +344,8 @@ export class StConnector {
                     token.callbackAuthentication,
                     deviceState,
                     async (callbackAuthentication) => {
+                        console.log('refreshedCallback');
+
                         const accessToken = token.accessToken
                         await this.client.withClient(async (db) => {
                             const collection = db.collection('CallbackAccessTokens');
