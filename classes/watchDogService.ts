@@ -71,6 +71,10 @@ export async function sendState(value, app: Application) {
             "value": 10,
             "unit": "s"
         }, {
+            "capability": "st.healthCheck",
+            "attribute": "DeviceWatch-DeviceStatus",
+            "value": "online"
+        }, {
             "capability": "st.tamperAlert",
             "attribute": "tamper",
             "value": value,
