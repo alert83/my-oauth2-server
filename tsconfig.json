@@ -29,9 +29,6 @@
       "reflect-metadata"
     ],
     "plugins": [
-      {
-        "transform": "ts-optchain/transform"
-      }
     ]
   },
   "include": [

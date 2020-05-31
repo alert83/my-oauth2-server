@@ -28,13 +28,12 @@
     "nodemailer": "^6.4.8",
     "oauth2-server": "^3.0.1",
     "reflect-metadata": "^0.1.13",
+    "rxjs": "^6.5.5",
     "st-schema": "^1.3.4",
     "strong-error-handler": "^3.4.0",
     "ts-node": "^8.10.2",
-    "ts-optchain": "^0.1.8",
     "tslint": "^6.1.2",
-    "typescript": "^3.9.3",
-    "uuid": "^7.0.3"
+    "typescript": "^3.9.3"
   },
   "devDependencies": {
     "@types/bluebird": "^3.5.32",
@@ -45,9 +44,7 @@
     "@types/node": "^12.12.42",
     "@types/nodemailer": "^6.4.0",
     "@types/oauth2-server": "^3.0.12",
-    "@types/strong-error-handler": "^2.3.1",
-    "@types/uuid": "^7.0.4",
-    "tape": "^4.13.3"
+    "@types/strong-error-handler": "^2.3.1"
   },
   "repository": {},
   "keywords": [

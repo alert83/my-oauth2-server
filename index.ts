@@ -17,7 +17,7 @@ import './classes/ioc/loader';
 //
 import OAuth2Server from "oauth2-server";
 import {OAuth2Model} from "./classes/OAuth2Model";
-import {wdProcess} from "./classes/watchDogService";
+import {WatchDogService} from "./classes/watchDogService";
 
 config();
 
@@ -43,15 +43,18 @@ server.setConfig((_app) => {
         .use(urlencoded({extended: false}))
         .use(express.static(join(__dirname, 'public')))
         .use(errorHandler({
-            debug: app.get('env') === 'development' || true,
+            debug: app.get('env') === 'development',
             log: true,
         }))
         .set('oauth2', new OAuth2Server({model: container.get<OAuth2Model>(TYPE.OAuth2Model)}))
         .set('views', join(__dirname, 'views'))
         .set('view engine', 'ejs')
-        .set('last reset', new Date())
     ;
 });
 server.build();
-app.listen(PORT, () => console.log(`Listening on ${PORT}`));
-wdProcess(app).catch(console.error);
+app.listen(PORT, () => {
+    console.log(`Listening on ${PORT}`);
+
+    const wd = container.get<WatchDogService>(TYPE.WatchDogService);
+    wd.process();
+});
