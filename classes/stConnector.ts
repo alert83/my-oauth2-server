@@ -51,6 +51,8 @@ export interface IDevice {
 export class StConnector {
     public connector: any;
 
+    stateFields = ['component', 'capability', 'attribute', 'value', 'unit', 'data', 'timestamp'];
+
     constructor(
         @inject(TYPE.Application) private readonly app: Express,
         @inject(TYPE.MongoDBClient) private readonly client: MongoService,
@@ -153,8 +155,7 @@ export class StConnector {
                             if (state) {
                                 deviceResponse.addState(
                                     fromPairs(
-                                        ['component', 'capability', 'attribute', 'value', 'unit', 'data']
-                                            .map((k) => [k, (state as any)[k]])
+                                        this.stateFields.map((k) => [k, (state as any)[k]])
                                     )
                                 );
                             }
@@ -224,7 +225,7 @@ export class StConnector {
                     await collection1.deleteMany({accessToken});
 
                     const collection2 = db.collection('CallbackAccessTokens');
-                    await collection2.deleteMany({'callbackAuthentication.accessToken' : data.callbackAuthentication.accessToken});
+                    await collection2.deleteMany({'callbackAuthentication.accessToken': data.callbackAuthentication.accessToken});
                 });
             })
     }
@@ -254,7 +255,8 @@ export class StConnector {
                         "states.capability": state.capability,
                         "states.attribute": state.attribute,
                     },
-                    {$set: {"states.$": newState}}
+                    {$set: {"states.$": newState}},
+                    {upsert: true},
                 )
             });
 
@@ -317,9 +319,14 @@ export class StConnector {
                         value,
                         unit: s.unit ?? null,
                         data: s.data ?? null,
-                        timestamp: new Date().getTime()
+                        timestamp: new Date().getTime(),
                     });
-                    return compact(await this.updateMyState(externalDeviceId, state) ?? state);
+                    return compact(
+                        fromPairs(
+                            Object.entries(await this.updateMyState(externalDeviceId, state) ?? state)
+                                .filter(([k, v]) => this.stateFields.includes(k))
+                        ) as IDeviceState
+                    );
                 })
 
                 return {externalDeviceId, states};
