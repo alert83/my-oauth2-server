@@ -43,7 +43,7 @@ server.setConfig((_app) => {
         .use(urlencoded({extended: false}))
         .use(express.static(join(__dirname, 'public')))
         .use(errorHandler({
-            debug: app.get('env') === 'development',
+            debug: app.get('env') === 'development' || true,
             log: true,
         }))
         .set('oauth2', new OAuth2Server({model: container.get<OAuth2Model>(TYPE.OAuth2Model)}))

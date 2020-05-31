@@ -66,9 +66,9 @@ export async function sendState(value, app: Application) {
             "attribute": "tamper",
             "value": value,
         },{
-            "capability": "st.healthCheck",
-            "attribute": "healthStatus",
-            "value": "online",
+            "capability": "st.panicAlarm",
+            "attribute": "panicAlarm",
+            "value": value === "clear" ? "clear" : "panic",
         }]
     }]);
 }
