@@ -357,8 +357,8 @@ export class StConnector {
                     process.env.ST_CLIENT_SECRET,
                 );
 
-                console.log('updateState', token.accessToken);
-                console.dir(deviceStates, {depth: 10});
+                console.log('updateState', token.accessToken, deviceStates);
+                // console.dir(deviceStates, {depth: 10});
 
                 await stateUpdateRequest.updateState(
                     token.callbackUrls,
