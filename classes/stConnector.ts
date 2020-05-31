@@ -297,7 +297,7 @@ export class StConnector {
     }
 
     async setStates(devices: any[]) {
-        const deviceState: { externalDeviceId, states: IDeviceState[] }[] =
+        const deviceStates: { externalDeviceId, states: IDeviceState[] }[] =
             await Bluebird.mapSeries(devices, async (d) => {
                 const externalDeviceId: string = d.deviceId;
                 let states: IDeviceState[] = d.states;
@@ -337,12 +337,12 @@ export class StConnector {
                     process.env.ST_CLIENT_SECRET,
                 );
 
-                // console.log('updateState');
+                console.log('updateState');
 
                 await stateUpdateRequest.updateState(
                     token.callbackUrls,
                     token.callbackAuthentication,
-                    deviceState,
+                    deviceStates,
                     async (callbackAuthentication) => {
                         console.log('refreshedCallback');
 
