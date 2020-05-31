@@ -58,7 +58,7 @@ export class StConnector {
         'value',
         'unit',
         'data',
-        // 'timestamp',
+        'timestamp',
     ];
 
     constructor(
@@ -249,29 +249,26 @@ export class StConnector {
             s.attribute === state.attribute
         );
 
-        if (!curState || (
-            curState.value !== state.value ||
-            curState.unit !== state.unit ||
-            curState.data !== state.data
-        )) {
-            const newState: IDeviceState = compact(merge({}, curState, state));
-            await this.client.withClient(async (db) => {
-                const collection = db.collection<IDevice>('my-devices');
+        // if (!curState || (
+        //     curState.value !== state.value ||
+        //     curState.unit !== state.unit ||
+        //     curState.data !== state.data
+        // )) {
+        const newState: IDeviceState = compact(merge({}, curState, state));
 
-                const idx = myDevice.states.findIndex((s) =>
-                    state.capability === s.capability && state.attribute === s.attribute)
+        const idx = myDevice.states.findIndex((s) =>
+            state.capability === s.capability && state.attribute === s.attribute)
 
-                if (idx >= 0) myDevice.states.splice(idx, 1, newState);
-                else myDevice.states.push(newState);
+        if (idx >= 0) myDevice.states.splice(idx, 1, newState);
+        else myDevice.states.push(newState);
 
-                await collection.updateOne(
-                    {externalDeviceId},
-                    {$set: {"states": myDevice.states}},
-                );
-            });
+        await this.client.withClient(async (db) => {
+            const collection = db.collection<IDevice>('my-devices');
+            await collection.updateOne({externalDeviceId}, {$set: {"states": myDevice.states}});
+        });
 
-            return newState;
-        }
+        return newState;
+        // }
     }
 
     commandToState(cmd: { component, capability, command, arguments: any[] }) {
