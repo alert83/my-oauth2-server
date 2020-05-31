@@ -177,7 +177,12 @@ export class StConnector {
             .callbackAccessHandler(async (accessToken: string,
                                           callbackAuthentication: ICallbackAuthentication,
                                           callbackUrls: ICallbackUrls,
-                                          data) => {
+                                          data: {
+                                              headers: { schema, version, interactionType, requestId },
+                                              authentication: { tokenType, token },
+                                              callbackAuthentication: { grantType, scope, code, clientId },
+                                              callbackUrls: { oauthToken, stateCallback },
+                                          }) => {
                 console.log('callbackAccessHandler =>', accessToken, data);
 
                 await this.client.withClient(async (db) => {
@@ -206,12 +211,19 @@ export class StConnector {
              * tokens and other data when that happend.
              * @accessToken External cloud access token
              */
-            .integrationDeletedHandler(async (accessToken: string, data) => {
+            .integrationDeletedHandler(async (accessToken: string, data: {
+                headers: { schema, version, interactionType, requestId },
+                authentication: { tokenType, token },
+                callbackAuthentication: { accessToken, refreshToken },
+            }) => {
                 console.log('integrationDeletedHandler =>', accessToken, data);
 
                 await this.client.withClient(async (db) => {
-                    const collection = db.collection('CallbackAccessTokens');
-                    await collection.deleteMany({accessToken});
+                    const collection1 = db.collection('my-oauth2-tokens');
+                    await collection1.deleteMany({accessToken});
+
+                    const collection2 = db.collection('CallbackAccessTokens');
+                    await collection2.deleteMany({'callbackAuthentication.accessToken' : data.callbackAuthentication.accessToken});
                 });
             })
     }
