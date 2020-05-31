@@ -246,21 +246,18 @@ export class StConnector {
             curState.unit !== state.unit ||
             curState.data !== state.data
         )) {
-            const newState: IDeviceState = compact(merge({}, curState, state, {cdate: new Date()}));
+            const newState: IDeviceState = compact(merge({}, curState, state));
             await this.client.withClient(async (db) => {
                 const collection = db.collection<IDevice>('my-devices');
 
-                const device = await collection.findOne({externalDeviceId});
-                if (device) {
-                    const idx = device.states.findIndex((s) =>
-                        state.capability === s.capability && state.attribute === s.attribute)
-                    if (idx >= 0) device.states.splice(idx, 1, newState);
+                const idx = myDevice.states.findIndex((s) =>
+                    state.capability === s.capability && state.attribute === s.attribute)
+                if (idx >= 0) myDevice.states.splice(idx, 1, newState);
 
-                    await collection.updateOne(
-                        {externalDeviceId},
-                        {$set: {"states": device.states}},
-                    );
-                }
+                await collection.updateOne(
+                    {externalDeviceId},
+                    {$set: {"states": myDevice.states}},
+                );
             });
 
             return newState;
