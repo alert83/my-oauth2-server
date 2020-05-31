@@ -62,10 +62,19 @@ export async function sendState(value, app: Application) {
     await st.setStates([{
         "deviceId": process.env.WATCH_DOG_ID,
         "states": [{
+            "capability": "st.healthCheck",
+            "attribute": "healthStatus",
+            "value": "online"
+        }, {
+            "capability": "st.healthCheck",
+            "attribute": "checkInterval",
+            "value": 10,
+            "unit": "s"
+        }, {
             "capability": "st.tamperAlert",
             "attribute": "tamper",
             "value": value,
-        },{
+        }, {
             "capability": "st.panicAlarm",
             "attribute": "panicAlarm",
             "value": value === "clear" ? "clear" : "panic",
