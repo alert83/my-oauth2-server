@@ -32,8 +32,8 @@ export interface IDeviceState {
     capability: string;
     attribute: string;
     value: string | number;
-    unit?: string;
-    data?: any;
+    unit?: string | null;
+    data?: any | null;
     cdate?: Date;
 }
 
@@ -314,8 +314,8 @@ export class StConnector {
                         capability: s.capability,
                         attribute: s.attribute,
                         value,
-                        unit: s.unit,
-                        data: s.data,
+                        unit: s.unit ?? null,
+                        data: s.data ?? null,
                     });
                     return compact(await this.updateMyState(externalDeviceId, state) ?? state);
                 })
@@ -341,7 +341,8 @@ export class StConnector {
                     process.env.ST_CLIENT_SECRET,
                 );
 
-                console.log('updateState', token.accessToken, deviceStates);
+                console.log('updateState', token.accessToken);
+                console.dir(deviceStates);
 
                 await stateUpdateRequest.updateState(
                     token.callbackUrls,
