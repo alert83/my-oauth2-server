@@ -344,7 +344,7 @@ export class StConnector {
                 );
 
                 console.log('updateState', token.accessToken);
-                console.dir(deviceStates);
+                console.dir(deviceStates, {depth: 10});
 
                 await stateUpdateRequest.updateState(
                     token.callbackUrls,
