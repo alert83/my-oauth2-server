@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import {config} from "dotenv";
 //
+import * as Sentry from '@sentry/node';
 import {Container} from "inversify";
 import {buildProviderModule} from "inversify-binding-decorators";
 import {InversifyExpressServer} from "inversify-express-utils";
@@ -22,18 +23,22 @@ import {isDev, isProd} from "./classes/utils";
 
 config();
 
+if (isProd()) {
+    Sentry.init({dsn: process.env.SENTRY_DSN});
+}
+
 const PORT = process.env.PORT || 5000
+const app = express();
 
 const container = new Container({defaultScope: "Singleton"});
 container.load(buildProviderModule());
-
-const app = express();
 container.bind(TYPE.Application).toConstantValue(app);
-app.set('ioc container', container);
 
 const server = new InversifyExpressServer(container, null, null, app);
 server.setConfig((_app) => {
     _app
+        // Sentry request handler must be the first middleware on the app
+        .use(Sentry.Handlers.requestHandler())
         .use(session({
             secret: "38240a30-5ed7-41f2-981c-4a9603f332f2",
             resave: false,
@@ -43,10 +48,19 @@ server.setConfig((_app) => {
         .use(json())
         .use(urlencoded({extended: false}))
         .use(express.static(join(__dirname, 'public')))
+        // Sentry error handler must be before any other error middleware and after all controllers
+        .use(Sentry.Handlers.errorHandler({
+            shouldHandleError(error) {
+                // Capture all 404 and 500 errors
+                return Number(error.status) >= 400;
+            }
+        }))
         .use(errorHandler({
             debug: isDev(app),
             log: true,
         }))
+        //
+        .set('ioc container', container)
         .set('oauth2', new OAuth2Server({
             model: container.get<OAuth2Model>(TYPE.OAuth2Model),
             authorizationCodeLifetime: isProd() ? Number(process.env.CODE_LIFETIME ?? 5 * 60) : 5,

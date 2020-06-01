@@ -27,6 +27,14 @@ class Common extends BaseHttpController {
         res.end();
     }
 
+    @httpGet('/debug-sentry')
+    private debugSentry(
+        @request() req: Request,
+        @response() res: Response,
+    ) {
+        throw new Error('My first Sentry error!');
+    }
+
     @httpGet('/auth')
     private getAuth(
         @request() req: Request,
