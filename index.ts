@@ -62,7 +62,13 @@ server
     .setErrorConfig((_app) => {
         _app
             // Sentry error handler must be before any other error middleware and after all controllers
-            .use(Sentry.Handlers.errorHandler())
+            .use(Sentry.Handlers.errorHandler({
+                shouldHandleError(error) {
+                    console.log("!!!", error);
+                    // Capture all 404 and 500 errors
+                    return Number(error.status) >= 400;
+                }
+            }))
             .use(errorHandler({
                 debug: isDev(app),
                 log: true,
