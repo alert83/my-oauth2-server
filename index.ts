@@ -65,7 +65,7 @@ server
             .use(Sentry.Handlers.errorHandler({
                 shouldHandleError(error) {
                     // Capture all 404 and 500 errors
-                    return !error.status || Number(error.status) >= 400;
+                    return !error?.status || Number(error?.status) >= 400;
                 }
             }))
             .use(errorHandler({
