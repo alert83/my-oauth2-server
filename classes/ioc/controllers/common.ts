@@ -32,6 +32,8 @@ class Common extends BaseHttpController {
         @request() req: Request,
         @response() res: Response,
     ) {
+        console.log('auth:', req.params, req.query, req.body);
+
         const client_id = req.query.client_id;
         const response_type = req.query.response_type;
         const redirect_uri = req.query.redirect_uri;
@@ -49,6 +51,8 @@ class Common extends BaseHttpController {
         @response() res: Response,
         // next: NextFunction,
     ) {
+        console.log('login:', req.params, req.query, req.body);
+
         const code: AuthorizationCode = res.locals?.oauth?.code;
         const state = req.query.state
         const redirectUri = req.query.redirect_uri
@@ -65,6 +69,8 @@ class Common extends BaseHttpController {
         @request() req: Request,
         @response() res: Response,
     ) {
+        console.log('token:', req.params, req.query, req.body);
+
         const token: Token = res.locals.oauth.token;
         res.send({
             ...token,
@@ -74,6 +80,15 @@ class Common extends BaseHttpController {
             refresh_token: token.refreshToken,
             expires_in: moment(token.accessTokenExpiresAt).diff(moment(), 'seconds'),
         });
+        res.end();
+    }
+
+    @httpGet('/oauth/callback')
+    private async oauthCallback(
+        @request() req: Request,
+        @response() res: Response,
+    ) {
+        console.log('oauth/callback:', req.params, req.query, req.body);
         res.end();
     }
 }
