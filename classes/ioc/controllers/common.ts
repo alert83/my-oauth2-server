@@ -32,7 +32,7 @@ class Common extends BaseHttpController {
         @request() req: Request,
         @response() res: Response,
     ) {
-        console.log('auth:', req.params, req.query, req.body);
+        // console.log('auth:', req.params, req.query, req.body);
 
         const client_id = req.query.client_id;
         const response_type = req.query.response_type;
@@ -51,7 +51,7 @@ class Common extends BaseHttpController {
         @response() res: Response,
         // next: NextFunction,
     ) {
-        console.log('login:', req.params, req.query, req.body);
+        // console.log('login:', req.params, req.query, req.body);
 
         const code: AuthorizationCode = res.locals?.oauth?.code;
         const state = req.query.state
@@ -69,7 +69,7 @@ class Common extends BaseHttpController {
         @request() req: Request,
         @response() res: Response,
     ) {
-        console.log('token:', req.params, req.query, req.body);
+        // console.log('token:', req.params, req.query, req.body);
 
         const token: Token = res.locals.oauth.token;
         res.send({
