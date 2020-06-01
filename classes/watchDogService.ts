@@ -31,11 +31,11 @@ export class WatchDogService {
             }),
             switchMap(async (diff) => {
                 if (diff > secs) {
-                    console.log('detected');
+                    // console.log('detected');
                     await this.sendState('detected');
                     // await sendAlertEmail().catch((err) => console.error(err.message));
                 } else {
-                    console.log('clear');
+                    // console.log('clear');
                     await this.sendState('clear');
                 }
             }),

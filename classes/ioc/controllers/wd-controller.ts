@@ -19,7 +19,7 @@ class WdController extends BaseHttpController {
         @request() req: Request,
         @response() res: Response,
     ) {
-        console.log('reset');
+        // console.log('reset');
         this.wd.$reset$.next(new Date());
         return res.status(200).send(true).end();
     }
