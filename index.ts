@@ -64,8 +64,10 @@ server
             // Sentry error handler must be before any other error middleware and after all controllers
             .use(Sentry.Handlers.errorHandler({
                 shouldHandleError(error) {
+                    let status: number | undefined = Number(error?.status);
+                    status = isNaN(status) ? undefined : status;
                     // Capture all 404 and 500 errors
-                    return !error?.status || Number(error?.status) >= 400;
+                    return !status || status >= 400;
                 }
             }))
             .use(errorHandler({
