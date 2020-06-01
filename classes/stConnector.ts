@@ -76,11 +76,14 @@ export class StConnector {
              * @accessToken External cloud access token
              * @response {DiscoveryResponse} Discovery response object
              */
-            .discoveryHandler(async (accessToken: string, response, data: {
-                headers: { schema, version, interactionType, requestId },
-                authentication: { tokenType, token },
-            }) => {
-                console.log('discoveryHandler =>', accessToken, data);
+            .discoveryHandler(async (
+                accessToken: string,
+                response,
+                data: {
+                    headers: { schema, version, interactionType, requestId },
+                    authentication: { tokenType, token },
+                }) => {
+                console.log('from smartthings', 'discoveryHandler =>', accessToken, data);
 
                 const devices: IDevice[] = await this.client.withClient(async (db) => {
                     const collection = db.collection<IDevice>('my-devices');
@@ -102,12 +105,15 @@ export class StConnector {
              * @accessToken External cloud access token
              * @response {StateRefreshResponse} StateRefresh response object
              */
-            .stateRefreshHandler(async (accessToken: string, response, data: {
-                headers: { schema, version, interactionType, requestId },
-                authentication: { tokenType, token },
-                devices: { externalDeviceId }[],
-            }) => {
-                console.log('stateRefreshHandler =>', accessToken, data);
+            .stateRefreshHandler(async (
+                accessToken: string,
+                response,
+                data: {
+                    headers: { schema, version, interactionType, requestId },
+                    authentication: { tokenType, token },
+                    devices: { externalDeviceId }[],
+                }) => {
+                console.log('from smartthings', 'stateRefreshHandler =>', accessToken, data);
 
                 const ids = data.devices ? data.devices.map((d) => d.externalDeviceId) : undefined;
                 const devices: IDevice[] = await this.client.withClient(async (db) => {
@@ -147,10 +153,13 @@ export class StConnector {
             .commandHandler(async (
                 accessToken: string,
                 response,
-                devices: { externalDeviceId, commands: { component, capability, command, arguments: any[] }[] }[],
+                devices: {
+                    externalDeviceId,
+                    commands: { component, capability, command, arguments: any[] }[],
+                }[],
                 data,
             ) => {
-                console.log('commandHandler =>', accessToken, devices, data);
+                console.log('from smartthings', 'commandHandler =>', accessToken, devices, data);
 
                 await Bluebird.each(devices, async (device) => {
                     const deviceResponse = response.addDevice(device.externalDeviceId);
@@ -184,16 +193,17 @@ export class StConnector {
              * @callbackAuthentication ST access and refresh tokens for proactive state callbacks
              * @callbackUrls Callback and refresh token URLs
              */
-            .callbackAccessHandler(async (accessToken: string,
-                                          callbackAuthentication: ICallbackAuthentication,
-                                          callbackUrls: ICallbackUrls,
-                                          data: {
-                                              headers: { schema, version, interactionType, requestId },
-                                              authentication: { tokenType, token },
-                                              callbackAuthentication: { grantType, scope, code, clientId },
-                                              callbackUrls: { oauthToken, stateCallback },
-                                          }) => {
-                console.log('callbackAccessHandler =>', accessToken, data);
+            .callbackAccessHandler(async (
+                accessToken: string,
+                callbackAuthentication: ICallbackAuthentication,
+                callbackUrls: ICallbackUrls,
+                data: {
+                    headers: { schema, version, interactionType, requestId },
+                    authentication: { tokenType, token },
+                    callbackAuthentication: { grantType, scope, code, clientId },
+                    callbackUrls: { oauthToken, stateCallback },
+                }) => {
+                console.log('from smartthings', 'callbackAccessHandler =>', accessToken, data);
 
                 await this.client.withClient(async (db) => {
                     const collection = db.collection('CallbackAccessTokens');
@@ -221,12 +231,14 @@ export class StConnector {
              * tokens and other data when that happend.
              * @accessToken External cloud access token
              */
-            .integrationDeletedHandler(async (accessToken: string, data: {
-                headers: { schema, version, interactionType, requestId },
-                authentication: { tokenType, token },
-                callbackAuthentication: { accessToken, refreshToken },
-            }) => {
-                console.log('integrationDeletedHandler =>', accessToken, data);
+            .integrationDeletedHandler(async (
+                accessToken: string,
+                data: {
+                    headers: { schema, version, interactionType, requestId },
+                    authentication: { tokenType, token },
+                    callbackAuthentication: { accessToken, refreshToken },
+                }) => {
+                console.log('from smartthings', 'integrationDeletedHandler =>', accessToken, data);
 
                 await this.client.withClient(async (db) => {
                     const collection1 = db.collection('my-oauth2-tokens');
@@ -357,7 +369,7 @@ export class StConnector {
                     process.env.ST_CLIENT_SECRET,
                 );
 
-                console.log('updateState', token.accessToken);
+                // console.log('updateState', token.accessToken);
                 // console.dir(deviceStates, {depth: 10});
 
                 await stateUpdateRequest.updateState(

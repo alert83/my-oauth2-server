@@ -18,7 +18,7 @@ import {TYPE} from "./classes/ioc/const";
 //
 import {OAuth2Model} from "./classes/OAuth2Model";
 import {WatchDogService} from "./classes/watchDogService";
-import {isProd} from "./classes/utils";
+import {isDev, isProd} from "./classes/utils";
 
 config();
 
@@ -44,7 +44,7 @@ server.setConfig((_app) => {
         .use(urlencoded({extended: false}))
         .use(express.static(join(__dirname, 'public')))
         .use(errorHandler({
-            debug: app.get('env') === 'development',
+            debug: isDev(app),
             log: true,
         }))
         .set('oauth2', new OAuth2Server({
