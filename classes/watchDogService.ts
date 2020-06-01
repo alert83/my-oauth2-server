@@ -72,24 +72,29 @@ export class WatchDogService {
 
         await this.st.setStates([{
             "deviceId": process.env.WATCH_DOG_ID,
-            "states": [{
-                "capability": "st.healthCheck",
-                "attribute": "healthStatus",
-                "value": "online"
-            }, {
-                "capability": "st.healthCheck",
-                "attribute": "checkInterval",
-                "value": 30,
-                "unit": "s"
-            }, {
-                "capability": "st.tamperAlert",
-                "attribute": "tamper",
-                "value": value,
-            }, {
-                "capability": "st.panicAlarm",
-                "attribute": "panicAlarm",
-                "value": value === "clear" ? "clear" : "panic",
-            }]
+            "states": [
+                // {
+                //     "capability": "st.healthCheck",
+                //     "attribute": "healthStatus",
+                //     "value": "online"
+                // },
+                // {
+                //     "capability": "st.healthCheck",
+                //     "attribute": "checkInterval",
+                //     "value": 30,
+                //     "unit": "s"
+                // },
+                {
+                    "capability": "st.tamperAlert",
+                    "attribute": "tamper",
+                    "value": value,
+                },
+                {
+                    "capability": "st.panicAlarm",
+                    "attribute": "panicAlarm",
+                    "value": value === "clear" ? "clear" : "panic",
+                },
+            ]
         }]);
     }
 }
