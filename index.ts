@@ -23,12 +23,15 @@ import {isDev, isProd} from "./classes/utils";
 
 config();
 
-if (isProd()) {
-    Sentry.init({dsn: process.env.SENTRY_DSN});
-}
-
 const PORT = process.env.PORT || 5000
 const app = express();
+
+if (isProd()) {
+    Sentry.init({dsn: process.env.SENTRY_DSN});
+
+    // Sentry request handler must be the first middleware on the app
+    app.use(Sentry.Handlers.requestHandler());
+}
 
 const container = new Container({defaultScope: "Singleton"});
 container.load(buildProviderModule());
@@ -37,8 +40,6 @@ container.bind(TYPE.Application).toConstantValue(app);
 const server = new InversifyExpressServer(container, null, null, app);
 server.setConfig((_app) => {
     _app
-        // Sentry request handler must be the first middleware on the app
-        .use(Sentry.Handlers.requestHandler())
         .use(session({
             secret: "38240a30-5ed7-41f2-981c-4a9603f332f2",
             resave: false,
@@ -48,18 +49,26 @@ server.setConfig((_app) => {
         .use(json())
         .use(urlencoded({extended: false}))
         .use(express.static(join(__dirname, 'public')))
+
+    //
+
+    if (isProd()) {
         // Sentry error handler must be before any other error middleware and after all controllers
-        .use(Sentry.Handlers.errorHandler({
+        app.use(Sentry.Handlers.errorHandler({
             shouldHandleError(error) {
                 // Capture all 404 and 500 errors
                 return Number(error.status) >= 400;
             }
         }))
-        .use(errorHandler({
-            debug: isDev(app),
-            log: true,
-        }))
-        //
+    }
+
+    app.use(errorHandler({
+        debug: isDev(app),
+        log: true,
+    }))
+
+    //
+    _app
         .set('ioc container', container)
         .set('oauth2', new OAuth2Server({
             model: container.get<OAuth2Model>(TYPE.OAuth2Model),
