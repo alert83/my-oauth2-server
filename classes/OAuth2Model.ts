@@ -178,9 +178,10 @@ export class OAuth2Model implements AuthorizationCodeModel, ClientCredentialsMod
             };
 
             const coll = db.collection<Token>('my-oauth2-tokens');
-            const res = await coll.findOneAndReplace(_token.accessToken ?
-                {accessToken: _token.accessToken} :
-                {refreshToken: _token.refreshToken},
+            const res = await coll.findOneAndReplace(
+                _token.accessToken
+                    ? {accessToken: _token.accessToken}
+                    : {refreshToken: _token.refreshToken},
                 _token,
                 {upsert: true, returnOriginal: false});
             return res.ok ? res.value : undefined;
@@ -195,9 +196,10 @@ export class OAuth2Model implements AuthorizationCodeModel, ClientCredentialsMod
 
         return this.cbAndPromise(async (db) => {
             const coll = db.collection<Token>('my-oauth2-tokens');
-            await coll.deleteMany(token.accessToken ?
-                {accessToken: token.accessToken} :
-                {refreshToken: token.refreshToken});
+            await coll.deleteMany(
+                token.accessToken
+                    ? {accessToken: token.accessToken}
+                    : {refreshToken: token.refreshToken});
             return true;
         }, callback);
     }
@@ -248,7 +250,7 @@ export class OAuth2Model implements AuthorizationCodeModel, ClientCredentialsMod
         scope: string | string[],
         callback?: Callback<boolean>,
     ): Promise<boolean> {
-        console.log('verifyScope =>', token);
+        console.log('verifyScope =>', token, scope);
 
         return this.cbAndPromise(async (db) => {
             return true;

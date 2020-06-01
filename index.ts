@@ -4,20 +4,21 @@ import {config} from "dotenv";
 import {Container} from "inversify";
 import {buildProviderModule} from "inversify-binding-decorators";
 import {InversifyExpressServer} from "inversify-express-utils";
-import {TYPE} from "./classes/ioc/const";
 import express from "express";
 import session from "express-session";
 import errorHandler from "strong-error-handler";
 import {json, urlencoded} from "body-parser";
 import {join} from "path";
+import OAuth2Server from "oauth2-server";
 //
 // load all injectable entities.
 // the @provide() annotation will then automatically register them.
 import './classes/ioc/loader';
+import {TYPE} from "./classes/ioc/const";
 //
-import OAuth2Server from "oauth2-server";
 import {OAuth2Model} from "./classes/OAuth2Model";
 import {WatchDogService} from "./classes/watchDogService";
+import {isProd} from "./classes/utils";
 
 config();
 
@@ -46,7 +47,12 @@ server.setConfig((_app) => {
             debug: app.get('env') === 'development',
             log: true,
         }))
-        .set('oauth2', new OAuth2Server({model: container.get<OAuth2Model>(TYPE.OAuth2Model)}))
+        .set('oauth2', new OAuth2Server({
+            model: container.get<OAuth2Model>(TYPE.OAuth2Model),
+            authorizationCodeLifetime: isProd() ? 5 * 60 : 5,
+            accessTokenLifetime: isProd() ? 2 * 60 * 60 : 5,
+            refreshTokenLifetime: isProd() ? 14 * 24 * 60 * 60 : 5,
+        }))
         .set('views', join(__dirname, 'views'))
         .set('view engine', 'ejs')
     ;
@@ -54,7 +60,10 @@ server.setConfig((_app) => {
 server.build();
 app.listen(PORT, () => {
     console.log(`Listening on ${PORT}`);
+    console.log(`env:`, process.env.NODE_ENV);
 
-    const wd = container.get<WatchDogService>(TYPE.WatchDogService);
-    wd.process();
+    if (isProd()) {
+        const wd = container.get<WatchDogService>(TYPE.WatchDogService);
+        wd.process();
+    }
 });
