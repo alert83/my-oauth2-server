@@ -386,11 +386,12 @@ export class StConnector {
                             await collection.findOneAndUpdate({
                                 accessToken,
                             }, {
-                                callbackAuthentication: {
-                                    ...callbackAuthentication,
-                                    expiresAt: moment().add(callbackAuthentication.expiresIn, "seconds").toDate(),
+                                $set: {
+                                    callbackAuthentication: {
+                                        ...callbackAuthentication,
+                                        expiresAt: moment().add(callbackAuthentication.expiresIn, "seconds").toDate(),
+                                    },
                                 },
-                                // ctime: new Date(),
                             }, {});
                         });
                     },
