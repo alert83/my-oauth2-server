@@ -11,7 +11,8 @@ import Bluebird from "bluebird";
 import {fromPairs, merge} from "lodash";
 import {compact} from "./utils";
 import moment from "moment";
-
+import got from "got";
+import * as Sentry from '@sentry/node';
 //
 
 interface ICallbackAuthentication {
@@ -182,7 +183,15 @@ export class StConnector {
                                 DeviceErrorTypes.CAPABILITY_NOT_SUPPORTED)
                         }
                     });
+                });
 
+                const redis = this.app.get('redis');
+                await got.post(await redis.get("ngrok") ?? '', {
+                    username: process.env.NGROK_USER,
+                    password: process.env.NGROK_PASS,
+                    json: devices,
+                }).catch((err) => {
+                    Sentry.captureException(err);
                 });
             })
 
