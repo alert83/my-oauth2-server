@@ -7,6 +7,8 @@ import {AuthorizationCode, Token} from "oauth2-server";
 import {authorizeHandler, loginHandler, tokenHandler} from "../middlewares";
 import {OAuth2Model} from "../../OAuth2Model";
 import moment from "moment";
+import { isEmpty } from 'lodash';
+import {promisify} from "util";
 
 @controller('',)
 class Common extends BaseHttpController {
@@ -25,6 +27,23 @@ class Common extends BaseHttpController {
     ) {
         res.send(req.query);
         res.end();
+    }
+
+    @httpPost('/ngrok')
+    private async ngrok(
+        @request() req: Request,
+        @response() res: Response,
+    ) {
+        const cbUrl: string = req.body.url;
+
+        if (!isEmpty(cbUrl)) {
+            const redis = this.app.get('redis');
+            await redis.set("ngrok", cbUrl);
+
+            res.status(200).send(await redis.get("ngrok"));
+        } else {
+            res.status(500).send('Empty cb url')
+        }
     }
 
     @httpGet('/debug-sentry')

@@ -11,6 +11,7 @@ import errorHandler from "strong-error-handler";
 import {json, urlencoded} from "body-parser";
 import {join} from "path";
 import OAuth2Server from "oauth2-server";
+import Redis from "ioredis";
 //
 // load all injectable entities.
 // the @provide() annotation will then automatically register them.
@@ -32,6 +33,8 @@ const container = new Container({defaultScope: "Singleton"});
 container.load(buildProviderModule());
 container.bind(TYPE.Application).toConstantValue(app);
 
+const redis = new Redis(process.env.REDIS_URL);
+
 const server = new InversifyExpressServer(container, null, null, app);
 server
     .setConfig((_app) => {
@@ -49,6 +52,7 @@ server
             .use(express.static(join(__dirname, 'public')))
         //
         _app
+            .set('redis', redis)
             .set('ioc container', container)
             .set('oauth2', new OAuth2Server({
                 model: container.get<OAuth2Model>(TYPE.OAuth2Model),

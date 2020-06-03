@@ -23,6 +23,7 @@
     "inversify": "^5.0.1",
     "inversify-binding-decorators": "^4.0.0",
     "inversify-express-utils": "^6.3.2",
+    "ioredis": "^4.17.3",
     "lodash": "^4.17.15",
     "moment": "^2.26.0",
     "mongodb": "^3.5.8",
