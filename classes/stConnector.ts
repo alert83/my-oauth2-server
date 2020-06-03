@@ -13,6 +13,7 @@ import {compact} from "./utils";
 import moment from "moment";
 import got from "got";
 import * as Sentry from '@sentry/node';
+
 //
 
 interface ICallbackAuthentication {
@@ -191,7 +192,11 @@ export class StConnector {
                     password: process.env.NGROK_PASS,
                     json: devices,
                 }).catch((err) => {
-                    Sentry.captureException(err);
+                    try {
+                        Sentry.captureException(err);
+                    } catch (e) {
+                        console.error(e);
+                    }
                 });
             })
 
