@@ -1,14 +1,13 @@
 import {Express, Request, Response} from 'express';
 import {inject} from 'inversify';
 import {BaseHttpController, controller, httpGet, httpPost, request, response} from 'inversify-express-utils';
-import {TYPE} from '../const';
-
 import {AuthorizationCode, Token} from "oauth2-server";
-import {authorizeHandler, loginHandler, tokenHandler} from "../middlewares";
-import {OAuth2Model} from "../../OAuth2Model";
+import {isEmpty} from 'lodash';
 import moment from "moment";
-import { isEmpty } from 'lodash';
-import {promisify} from "util";
+
+import {TYPE} from '../const';
+import {authorizeHandler, loginHandler, tokenHandler, xAuthIsValid} from "../middlewares";
+import {OAuth2Model} from "../../OAuth2Model";
 
 @controller('',)
 class Common extends BaseHttpController {
@@ -18,40 +17,6 @@ class Common extends BaseHttpController {
         @inject(TYPE.OAuth2Model) private readonly model: OAuth2Model,
     ) {
         super();
-    }
-
-    @httpGet('')
-    private root(
-        @request() req: Request,
-        @response() res: Response,
-    ) {
-        res.send(req.query);
-        res.end();
-    }
-
-    @httpPost('/ngrok')
-    private async ngrok(
-        @request() req: Request,
-        @response() res: Response,
-    ) {
-        const cbUrl: string = req.body.url;
-
-        if (!isEmpty(cbUrl)) {
-            const redis = this.app.get('redis');
-            await redis.set("ngrok", cbUrl);
-
-            res.status(200).send(await redis.get("ngrok"));
-        } else {
-            res.status(500).send('Empty cb url')
-        }
-    }
-
-    @httpGet('/debug-sentry')
-    private debugSentry(
-        @request() req: Request,
-        @response() res: Response,
-    ) {
-        throw new Error('My first Sentry error!');
     }
 
     @httpGet('/auth')
@@ -69,7 +34,7 @@ class Common extends BaseHttpController {
         res.render('pages/login', {client_id, response_type, redirect_uri, state});
     }
 
-    @httpGet('/login',
+    @httpPost('/login',
         loginHandler(),
         authorizeHandler({authenticateHandler: {handle: (req: any, res: any) => req.session.user}}),
     )
@@ -110,12 +75,42 @@ class Common extends BaseHttpController {
         res.end();
     }
 
-    @httpGet('/oauth/callback')
-    private async oauthCallback(
+    //
+
+    @httpGet('', xAuthIsValid())
+    private root(
         @request() req: Request,
         @response() res: Response,
     ) {
-        console.log('oauth/callback:', req.params, req.query, req.body);
+        res.send(req.query);
         res.end();
     }
+
+    @httpPost('/ngrok', xAuthIsValid())
+    private async ngrok(
+        @request() req: Request,
+        @response() res: Response,
+    ) {
+        const cbUrl: string = req.body.url;
+
+        if (!isEmpty(cbUrl)) {
+            const redis = this.app.get('redis');
+            await redis.set("ngrok", cbUrl);
+
+            res.status(200).send(await redis.get("ngrok"));
+        } else {
+            res.status(500).send('Empty cb url')
+        }
+    }
+
+    //
+
+    // @httpGet('/oauth/callback')
+    // private async oauthCallback(
+    //     @request() req: Request,
+    //     @response() res: Response,
+    // ) {
+    //     console.log('oauth/callback:', req.params, req.query, req.body);
+    //     res.end();
+    // }
 }

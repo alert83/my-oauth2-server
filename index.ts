@@ -7,6 +7,7 @@ import {buildProviderModule} from "inversify-binding-decorators";
 import {InversifyExpressServer} from "inversify-express-utils";
 import express from "express";
 import session from "express-session";
+import connectRedis from 'connect-redis';
 import errorHandler from "strong-error-handler";
 import {json, urlencoded} from "body-parser";
 import {join} from "path";
@@ -24,6 +25,9 @@ import {isDev, isProd} from "./classes/utils";
 
 config();
 
+const RedisStore = connectRedis(session);
+const redis = new Redis(process.env.REDIS_URL);
+
 const PORT = process.env.PORT || 5000
 const app = express();
 
@@ -33,8 +37,6 @@ const container = new Container({defaultScope: "Singleton"});
 container.load(buildProviderModule());
 container.bind(TYPE.Application).toConstantValue(app);
 
-const redis = new Redis(process.env.REDIS_URL);
-
 const server = new InversifyExpressServer(container, null, null, app);
 server
     .setConfig((_app) => {
@@ -42,10 +44,11 @@ server
             // Sentry request handler must be the first middleware on the app
             .use(Sentry.Handlers.requestHandler())
             .use(session({
+                store: new RedisStore({client: redis}),
                 secret: "38240a30-5ed7-41f2-981c-4a9603f332f2",
                 resave: false,
                 saveUninitialized: true,
-                cookie: {secure: false}
+                cookie: {secure: false},
             }))
             .use(json())
             .use(urlencoded({extended: false}))

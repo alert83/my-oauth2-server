@@ -1,11 +1,12 @@
 import {BaseHttpController, controller, httpGet, request, response} from 'inversify-express-utils';
 import {Request, Response} from "express";
-import {xAuthIsValid} from "../middlewares";
 import {inject} from "inversify";
+
 import {TYPE} from "../const";
+import {xAuthIsValid} from "../middlewares";
 import {WatchDogService} from "../../watchDogService";
 
-@controller('/wd')
+@controller('/wd', xAuthIsValid())
 class WdController extends BaseHttpController {
 
     constructor(
@@ -14,7 +15,7 @@ class WdController extends BaseHttpController {
         super();
     }
 
-    @httpGet('/', xAuthIsValid())
+    @httpGet('/')
     public async root(
         @request() req: Request,
         @response() res: Response,

@@ -20,6 +20,8 @@ import {MongoService} from "./mongoService";
 import {Db} from "mongodb";
 import {createHmac, randomBytes} from "crypto";
 
+type MongoAuthorizationCode = Pick<AuthorizationCode, "authorizationCode" | "expiresAt" | "redirectUri" | "scope" | 'clientId' | 'userId'>;
+
 @provideIf(TYPE.OAuth2Model, true)
 export class OAuth2Model implements AuthorizationCodeModel, ClientCredentialsModel, RefreshTokenModel, PasswordModel, ExtensionModel {
 
@@ -69,7 +71,7 @@ export class OAuth2Model implements AuthorizationCodeModel, ClientCredentialsMod
         };
     };
 
-    static saltHashPassword(userpassword) {
+    private static saltHashPassword(userpassword) {
         const salt = process.env.SALT ?? this.genRandomString(16);
         /** Gives us salt of length 16 */
         const passwordData = this.sha512(userpassword, salt);
@@ -79,20 +81,21 @@ export class OAuth2Model implements AuthorizationCodeModel, ClientCredentialsMod
         return passwordData;
     }
 
-    //
-
-    async getAuthorizationCode(
-        authorizationCode: string,
-        callback?: Callback<AuthorizationCode>,
-    ): Promise<AuthorizationCode | Falsey> {
-        console.log('getAuthorizationCode =>', authorizationCode);
-
+    private async getClientAndUser(clientId, userId) {
         return this.cbAndPromise(async (db) => {
-            const coll = db.collection<AuthorizationCode>('my-oauth2-codes');
-            const code = await coll.findOne({authorizationCode});
-            return code ?? undefined;
-        }, callback)
+            const clientsColl = db.collection<Client>('my-clients');
+            const client = await clientsColl.findOne({_id: clientId});
+            delete client?.clientSecret;
+
+            const usersColl = db.collection<User>('my-users');
+            const user = await usersColl.findOne({_id: userId});
+            delete user?.hash;
+
+            return {client, user};
+        });
     }
+
+    // region AuthorizationCode
 
     async saveAuthorizationCode(
         code: Pick<AuthorizationCode, "authorizationCode" | "expiresAt" | "redirectUri" | "scope">,
@@ -103,19 +106,36 @@ export class OAuth2Model implements AuthorizationCodeModel, ClientCredentialsMod
         console.log('saveAuthorizationCode =>', code);
 
         return this.cbAndPromise(async (db) => {
-            const _code: AuthorizationCode = {
+            const codeObj: MongoAuthorizationCode = {
                 ...code,
-                client,
                 clientId: client._id,
-                user,
                 userId: user._id,
             };
 
-            const coll = db.collection<AuthorizationCode>('my-oauth2-codes');
-            const res = await coll.findOneAndReplace({authorizationCode: _code.authorizationCode},
-                _code,
+            const coll = db.collection<MongoAuthorizationCode>('my-oauth2-codes');
+            const res = await coll.findOneAndReplace({authorizationCode: codeObj.authorizationCode},
+                codeObj,
                 {upsert: true, returnOriginal: false});
             return res.ok ? res.value : undefined;
+        }, callback);
+    }
+
+    async getAuthorizationCode(
+        authorizationCode: string,
+        callback?: Callback<AuthorizationCode>,
+    ): Promise<AuthorizationCode | Falsey> {
+        console.log('getAuthorizationCode =>', authorizationCode);
+
+        return this.cbAndPromise(async (db) => {
+            const coll = db.collection<MongoAuthorizationCode>('my-oauth2-codes');
+            const code = await coll.findOne({authorizationCode});
+
+            if (code) {
+                return {
+                    ...code,
+                    ...(await this.getClientAndUser(code.clientId, code.userId)),
+                };
+            }
         }, callback)
     }
 
@@ -132,7 +152,35 @@ export class OAuth2Model implements AuthorizationCodeModel, ClientCredentialsMod
         }, callback);
     }
 
-    //
+    // endregion
+
+    // region Token
+
+    async saveToken(
+        token: Token,
+        client: Client,
+        user: User,
+        callback?: Callback<Token>,
+    ): Promise<Token | Falsey> {
+        console.log('saveToken =>', token);
+
+        return this.cbAndPromise(async (db) => {
+            const tokenObj: Token = {
+                ...token,
+                clientId: client._id,
+                userId: user._id,
+            };
+
+            const coll = db.collection<Token>('my-oauth2-tokens');
+            const res = await coll.findOneAndReplace(
+                tokenObj.accessToken
+                    ? {accessToken: tokenObj.accessToken}
+                    : {refreshToken: tokenObj.refreshToken},
+                tokenObj,
+                {upsert: true, returnOriginal: false});
+            return res.ok ? res.value : undefined;
+        }, callback);
+    }
 
     async getAccessToken(
         accessToken: string,
@@ -143,7 +191,13 @@ export class OAuth2Model implements AuthorizationCodeModel, ClientCredentialsMod
         return this.cbAndPromise(async (db) => {
             const coll = db.collection<Token>('my-oauth2-tokens');
             const token = await coll.findOne({accessToken});
-            return token ?? undefined;
+
+            if (token) {
+                return {
+                    ...token,
+                    ...(await this.getClientAndUser(token.clientId, token.userId)),
+                };
+            }
         }, callback);
     }
 
@@ -156,35 +210,13 @@ export class OAuth2Model implements AuthorizationCodeModel, ClientCredentialsMod
         return this.cbAndPromise(async (db) => {
             const coll = db.collection<RefreshToken>('my-oauth2-tokens');
             const token = await coll.findOne({refreshToken});
-            return token ?? undefined;
-        }, callback);
-    }
 
-    async saveToken(
-        token: Token,
-        client: Client,
-        user: User,
-        callback?: Callback<Token>,
-    ): Promise<Token | Falsey> {
-        console.log('saveToken =>', token);
-
-        return this.cbAndPromise(async (db) => {
-            const _token: Token = {
-                ...token,
-                client,
-                clientId: client._id,
-                user,
-                userId: user._id,
-            };
-
-            const coll = db.collection<Token>('my-oauth2-tokens');
-            const res = await coll.findOneAndReplace(
-                _token.accessToken
-                    ? {accessToken: _token.accessToken}
-                    : {refreshToken: _token.refreshToken},
-                _token,
-                {upsert: true, returnOriginal: false});
-            return res.ok ? res.value : undefined;
+            if (token) {
+                return {
+                    ...token,
+                    ...(await this.getClientAndUser(token.clientId, token.userId)),
+                };
+            }
         }, callback);
     }
 
@@ -204,11 +236,13 @@ export class OAuth2Model implements AuthorizationCodeModel, ClientCredentialsMod
         }, callback);
     }
 
+    // endregion
+
     //
 
     async getClient(
         clientId: string,
-        clientSecret: string,
+        clientSecret: string | null,
         callback?: Callback<Client | Falsey>,
     ): Promise<Client | Falsey> {
         return this.cbAndPromise(async (db) => {
@@ -239,7 +273,7 @@ export class OAuth2Model implements AuthorizationCodeModel, ClientCredentialsMod
     ): Promise<User | Falsey> {
         return this.cbAndPromise(async (db) => {
             const coll = db.collection<User>('my-users');
-            const user = await coll.findOne({clientId: client.id},
+            const user = await coll.findOne({_id: client.userId},
                 {projection: {hash: false}});
             return user ?? undefined;
         }, callback);

@@ -60,7 +60,7 @@ export class StConnector {
         'value',
         'unit',
         'data',
-        'timestamp',
+        // 'timestamp',
     ];
 
     constructor(
