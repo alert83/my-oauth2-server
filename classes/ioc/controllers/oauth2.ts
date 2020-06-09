@@ -24,6 +24,7 @@ class Oauth2 extends BaseHttpController {
         @response() res: Response,
     ) {
         console.log('post token:', req.params, req.query, req.body);
+        res.send((res as any).body);
 
         // const token: Token = res.locals.oauth.token;
         // res.send({
@@ -103,26 +104,4 @@ class Oauth2 extends BaseHttpController {
         console.log('get logout:', req.params, req.query, req.body);
         if (req.session) req.session.user = undefined;
     }
-
-    // @httpPost('/authOld',
-    //     loginHandler(),
-    //     authorizeHandler({authenticateHandler: {handle: (req: any, res: any) => req.session.user}}),
-    // )
-    // private async authOld(
-    //     @request() req: Request & any,
-    //     @response() res: Response,
-    //     // next: NextFunction,
-    // ) {
-    //     // console.log('login:', req.params, req.query, req.body);
-    //
-    //     const code: AuthorizationCode = res.locals?.oauth?.code;
-    //     const state = req.query.state
-    //     const redirectUri = req.query.redirect_uri
-    //
-    //     let location = `${redirectUri}${redirectUri.includes('?') ? '&' : '?'}code=${code.authorizationCode}`;
-    //     if (state) location += "&state=" + state;
-    //
-    //     res.writeHead(307, {"Location": location});
-    //     res.end();
-    // }
 }
