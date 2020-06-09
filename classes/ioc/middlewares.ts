@@ -59,7 +59,10 @@ export function authenticateHandler(options?: AuthenticateOptions) {
         oauth2.authenticate(wrapRequest(req), wrapResponse(res), options, (err) => {
             if (err && err.code) {
                 return res.status(err.code).send({
-                    headers: req.body.headers,
+                    headers: {
+                        ...req.body.headers,
+                        interactionType: 'interactionResult',
+                    },
                     authentication: req.body.authentication,
                 });
             }
