@@ -25,17 +25,6 @@ class Oauth2 extends BaseHttpController {
     ) {
         console.log('post token:', req.params, req.query, req.body, res.locals.body);
         res.send(res.locals.body);
-
-        // const token: Token = res.locals.oauth.token;
-        // res.send({
-        //     ...token,
-        //
-        //     access_token: token.accessToken,
-        //     token_type: "bearer",
-        //     refresh_token: token.refreshToken,
-        //     expires_in: moment(token.accessTokenExpiresAt).diff(moment(), 'seconds'),
-        // });
-        // res.end();
     }
 
     // Get authorization.

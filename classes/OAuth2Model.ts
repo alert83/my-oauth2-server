@@ -34,11 +34,11 @@ export class OAuth2Model implements AuthorizationCodeModel, ClientCredentialsMod
     private async cbAndPromise(fn: (db: Db) => Promise<any>, callback?): Promise<any> {
         return await this.client.withClient(async (db) => {
             const res = await fn(db);
-            callback && callback(null, res);
-            return res;
+            if (callback) return callback(null, res);
+            else return res;
         })
             .catch((err) => {
-                if (callback) callback(err)
+                if (callback) return callback(err)
                 else throw err;
             });
     }
