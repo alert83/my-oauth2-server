@@ -80,6 +80,8 @@ export function tokenHandler(options?: TokenOptions) {
         //     .then(() => next())
         //     .catch(next);
 
+        console.log('tokenHandler:', req.params, req.query, req.body);
+
         const oauth2: OAuth2Server = req.app.get('oauth2');
         oauth2.token(wrapRequest(req), wrapResponse(res), options, next);
     }
