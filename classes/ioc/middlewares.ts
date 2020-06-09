@@ -5,9 +5,6 @@ import {OAuth2Model} from "../OAuth2Model";
 import {TYPE} from "./const";
 import {stringify} from "querystring";
 
-const OAuth2Request = OAuth2Server.Request;
-const OAuth2Response = OAuth2Server.Response;
-
 // Authenticates a request.
 export function authenticateHandler(options?: AuthenticateOptions) {
     return (req: Request, res: Response, next: NextFunction) => {
@@ -20,7 +17,7 @@ export function authenticateHandler(options?: AuthenticateOptions) {
         //     .catch(next);
 
         const oauth2: OAuth2Server = req.app.get('oauth2');
-        oauth2.authenticate(new OAuth2Request(req), new OAuth2Response(res), options, next);
+        oauth2.authenticate(req as any, res as any, options, next);
     }
 }
 
@@ -36,7 +33,7 @@ export function authorizeHandler(options?: AuthorizeOptions) {
         //     .catch(next);
 
         const oauth2: OAuth2Server = req.app.get('oauth2');
-        oauth2.authorize(new OAuth2Request(req), new OAuth2Response(res), options, next);
+        oauth2.authorize(req as any, res as any, options, next);
     }
 }
 
@@ -52,7 +49,7 @@ export function tokenHandler(options?: TokenOptions) {
         //     .catch(next);
 
         const oauth2: OAuth2Server = req.app.get('oauth2');
-        oauth2.token(new OAuth2Request(req), new OAuth2Response(res), options, next);
+        oauth2.token(req as any, res as any, options, next);
     }
 }
 
