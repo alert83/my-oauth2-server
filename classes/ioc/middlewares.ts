@@ -99,7 +99,7 @@ export function loginHandler() {
                 // tslint:disable-next-line:variable-name
                 const err_msg = "Invalid username or password.";
 
-                return res.redirect(400, format(
+                return res.redirect(301, format(
                     '/oauth2/login?' + [
                         'client_id', 'response_type', 'redirect_uri', 'state', 'err_msg'
                     ].map((itm) => itm + '=%s').join('&'),
