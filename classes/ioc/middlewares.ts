@@ -27,10 +27,17 @@ function wrapResponse(res: Response) {
     (oAuth2Response as any).res = res;
     return new Proxy<OAuth2Server.Response>(oAuth2Response, {
         get(target, p: PropertyKey, receiver: any): any {
-            return (target as any).res[p];
+            if (p === 'body')
+                return (target as any).res.locals.body;
+            else
+                return (target as any).res[p];
         },
         set(target, p: PropertyKey, value: any, receiver: any): boolean {
-            (target as any).res[p] = value;
+            if (p === 'body')
+                (target as any).res.locals.body = value;
+            else
+                (target as any).res[p] = value;
+
             return true;
         },
     });
