@@ -84,11 +84,11 @@ export class OAuth2Model implements AuthorizationCodeModel, ClientCredentialsMod
     private async getClientAndUser(clientId, userId) {
         return this.cbAndPromise(async (db) => {
             const clientsColl = db.collection<Client>('my-clients');
-            const client = await clientsColl.findOne({_id: new ObjectId(clientId).toHexString()});
+            const client = await clientsColl.findOne({_id: new ObjectId(clientId)});
             delete client?.clientSecret;
 
             const usersColl = db.collection<User>('my-users');
-            const user = await usersColl.findOne({_id: new ObjectId(userId).toHexString()});
+            const user = await usersColl.findOne({_id: new ObjectId(userId)});
             delete user?.hash;
 
             return {client, user};
@@ -286,7 +286,7 @@ export class OAuth2Model implements AuthorizationCodeModel, ClientCredentialsMod
 
         return this.cbAndPromise(async (db) => {
             const coll = db.collection<User>('my-users');
-            const user = await coll.findOne({_id: new ObjectId(client.userId).toHexString()},
+            const user = await coll.findOne({_id: new ObjectId(client.userId)},
                 {projection: {hash: false}});
             return user ?? undefined;
         }, callback);
