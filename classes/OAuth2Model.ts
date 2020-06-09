@@ -84,11 +84,11 @@ export class OAuth2Model implements AuthorizationCodeModel, ClientCredentialsMod
     private async getClientAndUser(clientId, userId) {
         return this.cbAndPromise(async (db) => {
             const clientsColl = db.collection<Client>('my-clients');
-            const client = await clientsColl.findOne({_id: new ObjectId(clientId)});
+            const client = await clientsColl.findOne({_id: new ObjectId(clientId).toHexString()});
             delete client?.clientSecret;
 
             const usersColl = db.collection<User>('my-users');
-            const user = await usersColl.findOne({_id: new ObjectId(userId)});
+            const user = await usersColl.findOne({_id: new ObjectId(userId).toHexString()});
             delete user?.hash;
 
             return {client, user};
@@ -116,7 +116,10 @@ export class OAuth2Model implements AuthorizationCodeModel, ClientCredentialsMod
             const res = await coll.findOneAndReplace({authorizationCode: codeObj.authorizationCode},
                 codeObj,
                 {upsert: true, returnOriginal: false});
-            return res.ok ? res.value : undefined;
+            return res.ok ? {
+                ...res.value,
+                ...(await this.getClientAndUser(codeObj.clientId, codeObj.userId)),
+            } : undefined;
         }, callback);
     }
 
@@ -178,7 +181,11 @@ export class OAuth2Model implements AuthorizationCodeModel, ClientCredentialsMod
                     : {refreshToken: tokenObj.refreshToken},
                 tokenObj,
                 {upsert: true, returnOriginal: false});
-            return res.ok ? res.value : undefined;
+
+            return res.ok ? {
+                ...res.value,
+                ...(await this.getClientAndUser(token.clientId, token.userId)),
+            } : undefined;
         }, callback);
     }
 
@@ -245,6 +252,8 @@ export class OAuth2Model implements AuthorizationCodeModel, ClientCredentialsMod
         clientSecret: string | null,
         callback?: Callback<Client | Falsey>,
     ): Promise<Client | Falsey> {
+        console.log('getClient =>');
+
         return this.cbAndPromise(async (db) => {
             const coll = db.collection<Client>('my-clients');
             const client = await coll.findOne(clientSecret ? {clientId, clientSecret} : {clientId},
@@ -258,6 +267,8 @@ export class OAuth2Model implements AuthorizationCodeModel, ClientCredentialsMod
         password: string,
         callback?: Callback<User | Falsey>,
     ): Promise<User | Falsey> {
+        console.log('getUser =>');
+
         return this.cbAndPromise(async (db) => {
             const coll = db.collection<User>('my-users');
             const data = OAuth2Model.saltHashPassword(password);
@@ -271,9 +282,11 @@ export class OAuth2Model implements AuthorizationCodeModel, ClientCredentialsMod
         client: Client,
         callback?: Callback<User | Falsey>,
     ): Promise<User | Falsey> {
+        console.log('getUserFromClient =>');
+
         return this.cbAndPromise(async (db) => {
             const coll = db.collection<User>('my-users');
-            const user = await coll.findOne({_id: new ObjectId(client.userId)},
+            const user = await coll.findOne({_id: new ObjectId(client.userId).toHexString()},
                 {projection: {hash: false}});
             return user ?? undefined;
         }, callback);
