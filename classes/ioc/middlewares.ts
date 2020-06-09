@@ -51,16 +51,8 @@ export function checkSessionUserHandler() {
     return (req: Request, res: Response, next: NextFunction) => {
         (async () => {
             if (!req.session?.user) {
-                // tslint:disable-next-line:variable-name
-                const client_id = req.query.client_id ?? req.body.client_id;
-                // tslint:disable-next-line:variable-name
-                const response_type = req.query.response_type ?? req.body.response_type;
-                // tslint:disable-next-line:variable-name
-                const redirect_uri = req.query.redirect_uri ?? req.body.redirect_uri;
-                const state = req.query.state ?? req.body.state;
-
                 return res.redirect('/oauth2/login?' +
-                    stringify({client_id, response_type, redirect_uri, state}));
+                    stringify({...req.query, ...req.body}));
             } else {
                 next();
             }
@@ -85,18 +77,10 @@ export function loginHandler() {
                 next();
             } else {
                 // tslint:disable-next-line:variable-name
-                const client_id = req.query.client_id ?? req.body.client_id;
-                // tslint:disable-next-line:variable-name
-                const response_type = req.query.response_type ?? req.body.response_type;
-                // tslint:disable-next-line:variable-name
-                const redirect_uri = req.query.redirect_uri ?? req.body.redirect_uri;
-                // tslint:disable-next-line:variable-name
-                const state = req.query.state ?? req.body.state;
-                // tslint:disable-next-line:variable-name
                 const err_msg = "Invalid username or password.";
 
                 return res.redirect(301, '/oauth2/login?' +
-                    stringify({client_id, response_type, redirect_uri, state, err_msg}));
+                    stringify({...req.query, ...req.body, err_msg}));
             }
         })()
             .catch(next);

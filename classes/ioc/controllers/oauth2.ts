@@ -92,14 +92,7 @@ class Oauth2 extends BaseHttpController {
         @response() res: Response,
     ) {
         console.log('post login:', req.params, req.query, req.body);
-
-        const client_id = req.body.client_id;
-        const response_type = req.body.response_type;
-        const redirect_uri = req.body.redirect_uri;
-        const state = req.body.state;
-
-        return res.redirect('/oauth2/authorize?' +
-            stringify(client_id, response_type, redirect_uri, state));
+        return res.redirect('/oauth2/authorize?' + stringify(req.body));
     }
 
     // Get login.
