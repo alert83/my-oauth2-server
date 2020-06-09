@@ -3,7 +3,7 @@ import OAuth2Server, {AuthenticateOptions, AuthorizeOptions, TokenOptions} from 
 import {Container} from "inversify";
 import {OAuth2Model} from "../OAuth2Model";
 import {TYPE} from "./const";
-import {format} from "util";
+import {stringify} from "querystring";
 
 const OAuth2Request = OAuth2Server.Request;
 const OAuth2Response = OAuth2Server.Response;
@@ -13,7 +13,7 @@ export function authenticateHandler(options?: AuthenticateOptions) {
     return (req: Request, res: Response, next: NextFunction) => {
         (async () => {
             const oauth2: OAuth2Server = req.app.get('oauth2');
-            const token = oauth2.authenticate(new OAuth2Request(req), new OAuth2Response(res), options);
+            const token = await oauth2.authenticate(new OAuth2Request(req), new OAuth2Response(res), options);
             res.locals.oauth = {token};
         })()
             .then(() => next())
@@ -26,7 +26,7 @@ export function authorizeHandler(options?: AuthorizeOptions) {
     return (req: Request, res: Response, next: NextFunction) => {
         (async () => {
             const oauth2: OAuth2Server = req.app.get('oauth2');
-            const code = oauth2.authorize(new OAuth2Request(req), new OAuth2Response(res), options);
+            const code = await oauth2.authorize(new OAuth2Request(req), new OAuth2Response(res), options);
             res.locals.oauth = {code};
         })()
             .then(() => next())
@@ -39,7 +39,7 @@ export function tokenHandler(options?: TokenOptions) {
     return (req: Request, res: Response, next: NextFunction) => {
         (async () => {
             const oauth2: OAuth2Server = req.app.get('oauth2');
-            const token = oauth2.token(new OAuth2Request(req), new OAuth2Response(res), options);
+            const token = await oauth2.token(new OAuth2Request(req), new OAuth2Response(res), options);
             res.locals.oauth = {token};
         })()
             .then(() => next())
@@ -59,12 +59,8 @@ export function checkSessionUserHandler() {
                 const redirect_uri = req.query.redirect_uri ?? req.body.redirect_uri;
                 const state = req.query.state ?? req.body.state;
 
-                return res.redirect(format(
-                    '/oauth2/login?' + [
-                        'client_id', 'response_type', 'redirect_uri', 'state'
-                    ].map((itm) => itm + '=%s').join('&'),
-                    client_id, response_type, redirect_uri, state,
-                ));
+                return res.redirect('/oauth2/login?' +
+                    stringify({client_id, response_type, redirect_uri, state}));
             } else {
                 next();
             }
@@ -99,12 +95,8 @@ export function loginHandler() {
                 // tslint:disable-next-line:variable-name
                 const err_msg = "Invalid username or password.";
 
-                return res.redirect(301, format(
-                    '/oauth2/login?' + [
-                        'client_id', 'response_type', 'redirect_uri', 'state', 'err_msg'
-                    ].map((itm) => itm + '=%s').join('&'),
-                    client_id, response_type, redirect_uri, state, err_msg,
-                ));
+                return res.redirect(301, '/oauth2/login?' +
+                    stringify({client_id, response_type, redirect_uri, state, err_msg}));
             }
         })()
             .catch(next);

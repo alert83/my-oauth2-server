@@ -6,6 +6,7 @@ import {TYPE} from '../const';
 import {authorizeHandler, checkSessionUserHandler, loginHandler, tokenHandler} from "../middlewares";
 import {OAuth2Model} from "../../OAuth2Model";
 import {format} from "util";
+import {stringify} from "querystring";
 
 @controller('/oauth2',)
 class Oauth2 extends BaseHttpController {
@@ -65,7 +66,6 @@ class Oauth2 extends BaseHttpController {
     ) {
         console.log('post authorize:', req.params, req.query, req.body);
         // const code: AuthorizationCode = res.locals?.oauth?.code;
-        // res.end();
     }
 
     // Get login.
@@ -98,12 +98,8 @@ class Oauth2 extends BaseHttpController {
         const redirect_uri = req.body.redirect_uri;
         const state = req.body.state;
 
-        return res.redirect(format(
-            '/oauth2/authorize?' + [
-                'client_id', 'response_type', 'redirect_uri', 'state'
-            ].map((itm) => itm + '=%s').join('&'),
-            client_id, response_type, redirect_uri, state,
-        ));
+        return res.redirect('/oauth2/authorize?' +
+            stringify(client_id, response_type, redirect_uri, state));
     }
 
     // Get login.
