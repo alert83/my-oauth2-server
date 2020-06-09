@@ -35,7 +35,7 @@ export function authorizeHandler(options?: AuthorizeOptions) {
         //     .then(() => next())
         //     .catch(next);
 
-        const oAuth2Request = new OAuth2Server.Request({});
+        const oAuth2Request = new OAuth2Server.Request({headers: {}, method: {}, query: {}});
         (oAuth2Request as any).req = req;
         const proxyReq = new Proxy<OAuth2Server.Request>(oAuth2Request, {
             get(target, p: PropertyKey, receiver: any): any {
