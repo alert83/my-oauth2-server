@@ -17,7 +17,7 @@ import {TYPE} from "./ioc/const";
 import {inject} from "inversify";
 import {Express} from "express";
 import {MongoService} from "./mongoService";
-import {Db} from "mongodb";
+import {Db, ObjectId} from "mongodb";
 import {createHmac, randomBytes} from "crypto";
 
 type MongoAuthorizationCode = Pick<AuthorizationCode, "authorizationCode" | "expiresAt" | "redirectUri" | "scope" | 'clientId' | 'userId'>;
@@ -84,11 +84,11 @@ export class OAuth2Model implements AuthorizationCodeModel, ClientCredentialsMod
     private async getClientAndUser(clientId, userId) {
         return this.cbAndPromise(async (db) => {
             const clientsColl = db.collection<Client>('my-clients');
-            const client = await clientsColl.findOne({_id: clientId});
+            const client = await clientsColl.findOne({_id: new ObjectId(clientId)});
             delete client?.clientSecret;
 
             const usersColl = db.collection<User>('my-users');
-            const user = await usersColl.findOne({_id: userId});
+            const user = await usersColl.findOne({_id: new ObjectId(userId)});
             delete user?.hash;
 
             return {client, user};
@@ -108,8 +108,8 @@ export class OAuth2Model implements AuthorizationCodeModel, ClientCredentialsMod
         return this.cbAndPromise(async (db) => {
             const codeObj: MongoAuthorizationCode = {
                 ...code,
-                clientId: client._id,
-                userId: user._id,
+                clientId: new ObjectId(client._id),
+                userId: new ObjectId(user._id),
             };
 
             const coll = db.collection<MongoAuthorizationCode>('my-oauth2-codes');
@@ -167,8 +167,8 @@ export class OAuth2Model implements AuthorizationCodeModel, ClientCredentialsMod
         return this.cbAndPromise(async (db) => {
             const tokenObj: Token = {
                 ...token,
-                clientId: client._id,
-                userId: user._id,
+                clientId: new ObjectId(client._id),
+                userId: new ObjectId(user._id),
             };
 
             const coll = db.collection<Token>('my-oauth2-tokens');
@@ -273,7 +273,7 @@ export class OAuth2Model implements AuthorizationCodeModel, ClientCredentialsMod
     ): Promise<User | Falsey> {
         return this.cbAndPromise(async (db) => {
             const coll = db.collection<User>('my-users');
-            const user = await coll.findOne({_id: client.userId},
+            const user = await coll.findOne({_id: new ObjectId(client.userId)},
                 {projection: {hash: false}});
             return user ?? undefined;
         }, callback);

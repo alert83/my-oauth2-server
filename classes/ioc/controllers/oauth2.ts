@@ -65,6 +65,7 @@ class Oauth2 extends BaseHttpController {
     ) {
         console.log('post authorize:', req.params, req.query, req.body);
         // const code: AuthorizationCode = res.locals?.oauth?.code;
+        // res.end();
     }
 
     // Get login.
