@@ -3,6 +3,7 @@ import OAuth2Server, {AuthenticateOptions, AuthorizeOptions, TokenOptions} from 
 import {Container} from "inversify";
 import {OAuth2Model} from "../OAuth2Model";
 import {TYPE} from "./const";
+import {format} from "util";
 
 const OAuth2Request = OAuth2Server.Request;
 const OAuth2Response = OAuth2Server.Response;
@@ -46,6 +47,32 @@ export function tokenHandler(options?: TokenOptions) {
     }
 }
 
+export function checkSessionUserHandler() {
+    return (req: Request, res: Response, next: NextFunction) => {
+        (async () => {
+            if (!req.session?.user) {
+                // tslint:disable-next-line:variable-name
+                const client_id = req.query.client_id ?? req.body.client_id;
+                // tslint:disable-next-line:variable-name
+                const response_type = req.query.response_type ?? req.body.response_type;
+                // tslint:disable-next-line:variable-name
+                const redirect_uri = req.query.redirect_uri ?? req.body.redirect_uri;
+                const state = req.query.state ?? req.body.state;
+
+                return res.redirect(format(
+                    '/oauth2/login?' + [
+                        'client_id', 'response_type', 'redirect_uri', 'state'
+                    ].map((itm) => itm + '=%s').join('&'),
+                    client_id, response_type, redirect_uri, state,
+                ));
+            } else {
+                next();
+            }
+        })()
+            .catch(next);
+    }
+}
+
 export function loginHandler() {
     return (req: Request, res: Response, next: NextFunction) => {
         (async () => {
@@ -53,12 +80,17 @@ export function loginHandler() {
             const model = container.get<OAuth2Model>(TYPE.OAuth2Model);
 
             const user = await model.getUser(
-                req.query.username as string,
-                req.query.password as string,
+                req.body.username as string,
+                req.body.password as string,
             );
-            (req as any).session.user = user;
+
+            if (user && req.session) {
+                req.session.user = user;
+                next();
+            } else {
+                return res.status(400).send("Invalid username or password.").end();
+            }
         })()
-            .then(() => next())
             .catch(next);
     }
 }

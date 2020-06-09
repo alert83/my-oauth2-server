@@ -4,14 +4,13 @@
 
 <body>
 <form method="post" action="/login">
-    <p><input type="text" placeholder="username" name="username"/></p>
-    <p><input type="password" placeholder="password" name="password"/></p>
+    <p><%- username %></p>
+    <p><input type="text" readonly name="client_id" value="<%- client_id %>"/></p>
+    <p><input type="text" readonly name="redirect_uri" value="<%- redirect_uri %>"/></p>
 
     <input type="submit" value="Authorize"/>
 
-    <input type="hidden" name="client_id" value="<%- client_id %>"/>
     <input type="hidden" name="response_type" value="<%- response_type %>"/>
-    <input type="hidden" name="redirect_uri" value="<%- redirect_uri %>"/>
     <input type="hidden" name="state" value="<%- state %>"/>
 </form>
 </body>
