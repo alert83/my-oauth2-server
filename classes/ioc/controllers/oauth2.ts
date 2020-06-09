@@ -79,8 +79,9 @@ class Oauth2 extends BaseHttpController {
         const response_type = req.query.response_type;
         const redirect_uri = req.query.redirect_uri;
         const state = req.query.state;
+        const err_msg = req.query.err_msg;
 
-        res.render('pages/login', {client_id, response_type, redirect_uri, state});
+        res.render('pages/login', {client_id, response_type, redirect_uri, state, err_msg});
     }
 
 

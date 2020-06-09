@@ -88,7 +88,23 @@ export function loginHandler() {
                 req.session.user = user;
                 next();
             } else {
-                return res.status(400).send("Invalid username or password.").end();
+                // tslint:disable-next-line:variable-name
+                const client_id = req.query.client_id ?? req.body.client_id;
+                // tslint:disable-next-line:variable-name
+                const response_type = req.query.response_type ?? req.body.response_type;
+                // tslint:disable-next-line:variable-name
+                const redirect_uri = req.query.redirect_uri ?? req.body.redirect_uri;
+                // tslint:disable-next-line:variable-name
+                const state = req.query.state ?? req.body.state;
+                // tslint:disable-next-line:variable-name
+                const err_msg = "Invalid username or password.";
+
+                return res.redirect(400, format(
+                    '/oauth2/login?' + [
+                        'client_id', 'response_type', 'redirect_uri', 'state', 'err_msg'
+                    ].map((itm) => itm + '=%s').join('&'),
+                    client_id, response_type, redirect_uri, state, err_msg,
+                ));
             }
         })()
             .catch(next);
