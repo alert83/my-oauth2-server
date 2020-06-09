@@ -184,7 +184,7 @@ export class OAuth2Model implements AuthorizationCodeModel, ClientCredentialsMod
 
             return res.ok ? {
                 ...res.value,
-                ...(await this.getClientAndUser(token.clientId, token.userId)),
+                ...(await this.getClientAndUser(tokenObj.clientId, tokenObj.userId)),
             } : undefined;
         }, callback);
     }
