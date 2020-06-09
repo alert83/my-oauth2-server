@@ -103,7 +103,7 @@ export class OAuth2Model implements AuthorizationCodeModel, ClientCredentialsMod
         user: User,
         callback?: Callback<AuthorizationCode>,
     ): Promise<AuthorizationCode | Falsey> {
-        console.log('saveAuthorizationCode =>', code);
+        console.log('saveAuthorizationCode =>');
 
         return this.cbAndPromise(async (db) => {
             const codeObj: MongoAuthorizationCode = {
@@ -124,7 +124,7 @@ export class OAuth2Model implements AuthorizationCodeModel, ClientCredentialsMod
         authorizationCode: string,
         callback?: Callback<AuthorizationCode>,
     ): Promise<AuthorizationCode | Falsey> {
-        console.log('getAuthorizationCode =>', authorizationCode);
+        console.log('getAuthorizationCode =>');
 
         return this.cbAndPromise(async (db) => {
             const coll = db.collection<MongoAuthorizationCode>('my-oauth2-codes');
@@ -143,7 +143,7 @@ export class OAuth2Model implements AuthorizationCodeModel, ClientCredentialsMod
         code: AuthorizationCode,
         callback?: Callback<boolean>,
     ): Promise<boolean> {
-        console.log('revokeAuthorizationCode =>', code);
+        console.log('revokeAuthorizationCode =>');
 
         return this.cbAndPromise(async (db) => {
             const coll = db.collection<AuthorizationCode>('my-oauth2-codes');
@@ -162,7 +162,7 @@ export class OAuth2Model implements AuthorizationCodeModel, ClientCredentialsMod
         user: User,
         callback?: Callback<Token>,
     ): Promise<Token | Falsey> {
-        console.log('saveToken =>', token);
+        console.log('saveToken =>');
 
         return this.cbAndPromise(async (db) => {
             const tokenObj: Token = {
@@ -186,7 +186,7 @@ export class OAuth2Model implements AuthorizationCodeModel, ClientCredentialsMod
         accessToken: string,
         callback?: Callback<Token>,
     ): Promise<Token | Falsey> {
-        console.log('getAccessToken =>', accessToken);
+        console.log('getAccessToken =>');
 
         return this.cbAndPromise(async (db) => {
             const coll = db.collection<Token>('my-oauth2-tokens');
@@ -205,7 +205,7 @@ export class OAuth2Model implements AuthorizationCodeModel, ClientCredentialsMod
         refreshToken: string,
         callback?: Callback<RefreshToken>,
     ): Promise<RefreshToken | Falsey> {
-        console.log('getRefreshToken =>', refreshToken);
+        console.log('getRefreshToken =>');
 
         return this.cbAndPromise(async (db) => {
             const coll = db.collection<RefreshToken>('my-oauth2-tokens');
@@ -224,7 +224,7 @@ export class OAuth2Model implements AuthorizationCodeModel, ClientCredentialsMod
         token: RefreshToken | Token,
         callback?: Callback<boolean>,
     ): Promise<boolean> {
-        console.log('revokeToken =>', token);
+        console.log('revokeToken =>');
 
         return this.cbAndPromise(async (db) => {
             const coll = db.collection<Token>('my-oauth2-tokens');
@@ -284,7 +284,7 @@ export class OAuth2Model implements AuthorizationCodeModel, ClientCredentialsMod
         scope: string | string[],
         callback?: Callback<boolean>,
     ): Promise<boolean> {
-        console.log('verifyScope =>', token, scope);
+        console.log('verifyScope =>', scope);
 
         return this.cbAndPromise(async (db) => {
             return true;

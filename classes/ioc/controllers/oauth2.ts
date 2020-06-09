@@ -23,7 +23,7 @@ class Oauth2 extends BaseHttpController {
         @request() req: Request,
         @response() res: Response,
     ) {
-        console.log('token:', req.params, req.query, req.body);
+        console.log('post token:', req.params, req.query, req.body);
 
         // const token: Token = res.locals.oauth.token;
         // res.send({
