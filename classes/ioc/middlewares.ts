@@ -30,7 +30,11 @@ function wrapResponse(res: Response) {
             return (target as any).res[p];
         },
         set(target, p: PropertyKey, value: any, receiver: any): boolean {
-            (target as any).res[p] = value;
+            if (p === 'body')
+                (target as any).res.json(value);
+            else
+                (target as any).res[p] = value;
+
             return true;
         },
     });
