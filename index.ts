@@ -23,6 +23,9 @@ import {OAuth2Model} from "./classes/OAuth2Model";
 import {WatchDogService} from "./classes/watchDogService";
 import {isDev, isProd} from "./classes/utils";
 
+import passport from "passport";
+import Auth0Strategy from "passport-auth0";
+
 config();
 
 const RedisStore = connectRedis(session);
@@ -37,21 +40,52 @@ const container = new Container({defaultScope: "Singleton"});
 container.load(buildProviderModule());
 container.bind(TYPE.Application).toConstantValue(app);
 
+
+// Configure Passport to use Auth0
+const strategy = new Auth0Strategy(
+    {
+        domain: 'alert.auth0.com',
+        clientID: 'eHiXR2yzfKFkJ0OLAohzXThbMNPlPawy',
+        clientSecret: 'ZyaRNtajikkqDK1wmgaIsYQ4k_M-L9QeWk9HI-R6fFbHL82gvJWxgpOLkQu642Lr',
+        callbackURL: process.env.AUTH0_CALLBACK_URL || 'http://localhost:3000/callback'
+    },
+    (accessToken, refreshToken, extraParams, profile, done) => {
+        // accessToken is the token to call Auth0 API (not needed in the most cases)
+        // extraParams.id_token has the JSON Web Token
+        // profile has all the information from the user
+        return done(null, profile);
+    }
+);
+
+passport.use(strategy);
+
+// You can use this section to keep a smaller payload
+passport.serializeUser((user, done) => {
+    done(null, user);
+});
+
+passport.deserializeUser((user, done) => {
+    done(null, user);
+});
+
+
 const server = new InversifyExpressServer(container, null, null, app);
 server
     .setConfig((_app) => {
         _app
             // Sentry request handler must be the first middleware on the app
             .use(Sentry.Handlers.requestHandler())
+            .use(json())
+            .use(urlencoded({extended: false}))
             .use(session({
                 store: new RedisStore({client: redis}),
                 secret: "38240a30-5ed7-41f2-981c-4a9603f332f2",
                 resave: false,
                 saveUninitialized: true,
-                cookie: {secure: false},
+                cookie: {secure: isProd()},
             }))
-            .use(json())
-            .use(urlencoded({extended: false}))
+            .use(passport.initialize())
+            .use(passport.session())
             .use(express.static(join(__dirname, 'public')))
         //
         _app

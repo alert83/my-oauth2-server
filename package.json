@@ -30,6 +30,8 @@
     "mongodb": "^3.5.8",
     "nodemailer": "^6.4.8",
     "oauth2-server": "^3.0.2",
+    "passport": "^0.4.1",
+    "passport-auth0": "^1.3.3",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^6.5.5",
     "st-schema": "^1.3.4",
