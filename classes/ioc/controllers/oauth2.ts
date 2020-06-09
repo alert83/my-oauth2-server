@@ -105,6 +105,16 @@ class Oauth2 extends BaseHttpController {
         ));
     }
 
+    // Get login.
+    @httpGet('/logout')
+    private getLogout(
+        @request() req: Request,
+        @response() res: Response,
+    ) {
+        console.log('get logout:', req.params, req.query, req.body);
+        if (req.session) req.session.user = undefined;
+    }
+
     // @httpPost('/authOld',
     //     loginHandler(),
     //     authorizeHandler({authenticateHandler: {handle: (req: any, res: any) => req.session.user}}),
