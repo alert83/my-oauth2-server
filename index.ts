@@ -84,8 +84,8 @@ server
                 saveUninitialized: true,
                 cookie: {secure: isProd()},
             }))
-            .use(passport.initialize())
-            .use(passport.session())
+            // .use(passport.initialize())
+            // .use(passport.session())
             .use(express.static(join(__dirname, 'public')))
         //
         _app

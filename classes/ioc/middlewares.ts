@@ -56,7 +56,17 @@ export function authenticateHandler(options?: AuthenticateOptions) {
         //     .catch(next);
 
         const oauth2: OAuth2Server = req.app.get('oauth2');
-        oauth2.authenticate(wrapRequest(req), wrapResponse(res), options, next);
+        oauth2.authenticate(wrapRequest(req), wrapResponse(res), options, (err) => {
+            if (err && err.code) {
+                return res.status(err.code).send({
+                    headers: req.body.headers,
+                    authentication: req.body.authentication,
+                });
+            }
+
+            if (err) return next(err);
+            next();
+        });
     }
 }
 
