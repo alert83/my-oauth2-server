@@ -82,7 +82,7 @@ server
                 secret: "38240a30-5ed7-41f2-981c-4a9603f332f2",
                 resave: false,
                 saveUninitialized: true,
-                cookie: {secure: isProd()},
+                cookie: {secure:false},
             }))
             // .use(passport.initialize())
             // .use(passport.session())
