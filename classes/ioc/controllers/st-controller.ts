@@ -16,7 +16,19 @@ class StController extends BaseHttpController {
         super();
     }
 
-    @httpPost('', authenticateHandler())
+    @httpPost('',
+        (req, res, next) => {
+            console.log('authenticateHandler:', req.headers, req.params, req.query, req.body);
+
+            if (!req.headers.authorization && req.body?.authentication) {
+                req.headers.authorization =
+                    `${req.body?.authentication?.tokenType} ${req.body?.authentication?.token}`
+            }
+
+            next();
+        },
+        authenticateHandler(),
+    )
     private async main(
         @request() req: Request,
         @response() res: Response,

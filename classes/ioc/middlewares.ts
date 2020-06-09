@@ -47,48 +47,52 @@ function wrapResponse(res: Response) {
 // Authenticates a request.
 export function authenticateHandler(options?: AuthenticateOptions) {
     return (req: Request, res: Response, next: NextFunction) => {
-        (async () => {
-            console.log('authenticateHandler:', req.headers, req.params, req.query, req.body);
+        // (async () => {
+        //     const oauth2: OAuth2Server = req.app.get('oauth2');
+        //     const token = await oauth2.authenticate(wrapRequest(req), wrapResponse(res), options);
+        //     res.locals.oauth = {token};
+        // })()
+        //     .then(() => next())
+        //     .catch(next);
 
-            if (!req.headers.authorization && req.body?.authentication) {
-                req.headers.authorization =
-                    `${req.body?.authentication?.tokenType} ${req.body?.authentication?.token}`
-            }
-
-            const oauth2: OAuth2Server = req.app.get('oauth2');
-            const token = await oauth2.authenticate(wrapRequest(req), wrapResponse(res), options);
-            res.locals.oauth = {token};
-        })()
-            .then(() => next())
-            .catch(next);
+        const oauth2: OAuth2Server = req.app.get('oauth2');
+        oauth2.authenticate(wrapRequest(req), wrapResponse(res), options, next);
     }
 }
 
 // Authorizes a token request.
 export function authorizeHandler(options?: AuthorizeOptions) {
     return (req: Request, res: Response, next: NextFunction) => {
-        (async () => {
-            const oauth2: OAuth2Server = req.app.get('oauth2');
-            const code = await oauth2.authorize(wrapRequest(req), wrapResponse(res), options);
-            res.locals.oauth = {code};
-        })()
-            .then(() => next())
-            .catch(next);
+        // (async () => {
+        //     const oauth2: OAuth2Server = req.app.get('oauth2');
+        //     const code = await oauth2.authorize(wrapRequest(req), wrapResponse(res), options);
+        //     res.locals.oauth = {code};
+        // })()
+        //     .then(() => next())
+        //     .catch(next);
+
+        const oauth2: OAuth2Server = req.app.get('oauth2');
+        oauth2.authorize(wrapRequest(req), wrapResponse(res), options, next);
     }
 }
 
 // Retrieves a new token for an authorized token request.
 export function tokenHandler(options?: TokenOptions) {
     return (req: Request, res: Response, next: NextFunction) => {
-        (async () => {
-            console.log('tokenHandler:', req.params, req.query, req.body);
+        // (async () => {
+        //     console.log('tokenHandler:', req.params, req.query, req.body);
+        //
+        //     const oauth2: OAuth2Server = req.app.get('oauth2');
+        //     const token = await oauth2.token(wrapRequest(req), wrapResponse(res), options);
+        //     res.locals.oauth = {token};
+        // })()
+        //     .then(() => next())
+        //     .catch(next);
 
-            const oauth2: OAuth2Server = req.app.get('oauth2');
-            const token = await oauth2.token(wrapRequest(req), wrapResponse(res), options);
-            res.locals.oauth = {token};
-        })()
-            .then(() => next())
-            .catch(next);
+        console.log('tokenHandler:', req.params, req.query, req.body);
+
+        const oauth2: OAuth2Server = req.app.get('oauth2');
+        oauth2.token(wrapRequest(req), wrapResponse(res), options, next);
     }
 }
 
