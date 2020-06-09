@@ -8,6 +8,35 @@ import {stringify} from "querystring";
 // const OAuth2Request = OAuth2Server.Request;
 // const OAuth2Response = OAuth2Server.Response;
 
+function wrapRequest(req: Request) {
+    const oAuth2Request = new OAuth2Server.Request({headers: {}, method: {}, query: {}});
+    (oAuth2Request as any).req = req;
+    return new Proxy<OAuth2Server.Request>(oAuth2Request, {
+        get(target, p: PropertyKey, receiver: any): any {
+            return (target as any).req[p];
+        },
+        set(target, p: PropertyKey, value: any, receiver: any): boolean {
+            (target as any).req[p] = value;
+            return true;
+        },
+    });
+}
+
+function wrapResponse(res: Response) {
+    const oAuth2Response = new OAuth2Server.Response({});
+    (oAuth2Response as any).res = res;
+    return new Proxy<OAuth2Server.Response>(oAuth2Response, {
+        get(target, p: PropertyKey, receiver: any): any {
+            return (target as any).res[p];
+        },
+        set(target, p: PropertyKey, value: any, receiver: any): boolean {
+            (target as any).res[p] = value;
+            return true;
+        },
+    });
+}
+
+
 // Authenticates a request.
 export function authenticateHandler(options?: AuthenticateOptions) {
     return (req: Request, res: Response, next: NextFunction) => {
@@ -20,7 +49,7 @@ export function authenticateHandler(options?: AuthenticateOptions) {
         //     .catch(next);
 
         const oauth2: OAuth2Server = req.app.get('oauth2');
-        oauth2.authenticate(req as any, res as any, options, next);
+        oauth2.authenticate(wrapRequest(req), wrapResponse(res), options, next);
     }
 }
 
@@ -35,32 +64,8 @@ export function authorizeHandler(options?: AuthorizeOptions) {
         //     .then(() => next())
         //     .catch(next);
 
-        const oAuth2Request = new OAuth2Server.Request({headers: {}, method: {}, query: {}});
-        (oAuth2Request as any).req = req;
-        const proxyReq = new Proxy<OAuth2Server.Request>(oAuth2Request, {
-            get(target, p: PropertyKey, receiver: any): any {
-                return (target as any).req[p];
-            },
-            set(target, p: PropertyKey, value: any, receiver: any): boolean {
-                (target as any).req[p] = value;
-                return true;
-            },
-        });
-
-        const oAuth2Response = new OAuth2Server.Response({});
-        (oAuth2Response as any).res = res;
-        const proxyRes = new Proxy<OAuth2Server.Response>(oAuth2Response, {
-            get(target, p: PropertyKey, receiver: any): any {
-                return (target as any).res[p];
-            },
-            set(target, p: PropertyKey, value: any, receiver: any): boolean {
-                (target as any).res[p] = value;
-                return true;
-            },
-        });
-
         const oauth2: OAuth2Server = req.app.get('oauth2');
-        oauth2.authorize(proxyReq, proxyRes, options, next);
+        oauth2.authorize(wrapRequest(req), wrapResponse(res), options, next);
     }
 }
 
@@ -76,9 +81,11 @@ export function tokenHandler(options?: TokenOptions) {
         //     .catch(next);
 
         const oauth2: OAuth2Server = req.app.get('oauth2');
-        oauth2.token(req as any, res as any, options, next);
+        oauth2.token(wrapRequest(req), wrapResponse(res), options, next);
     }
 }
+
+//
 
 export function checkSessionUserHandler() {
     return (req: Request, res: Response, next: NextFunction) => {
