@@ -5,7 +5,6 @@ import {BaseHttpController, controller, httpGet, httpPost, request, response} fr
 import {TYPE} from '../const';
 import {authorizeHandler, checkSessionUserHandler, loginHandler, tokenHandler} from "../middlewares";
 import {OAuth2Model} from "../../OAuth2Model";
-import {format} from "util";
 import {stringify} from "querystring";
 
 @controller('/oauth2',)

@@ -5,6 +5,9 @@ import {OAuth2Model} from "../OAuth2Model";
 import {TYPE} from "./const";
 import {stringify} from "querystring";
 
+// const OAuth2Request = OAuth2Server.Request;
+// const OAuth2Response = OAuth2Server.Response;
+
 // Authenticates a request.
 export function authenticateHandler(options?: AuthenticateOptions) {
     return (req: Request, res: Response, next: NextFunction) => {
@@ -32,8 +35,32 @@ export function authorizeHandler(options?: AuthorizeOptions) {
         //     .then(() => next())
         //     .catch(next);
 
+        const oAuth2Request = new OAuth2Server.Request({});
+        (oAuth2Request as any).req = req;
+        const proxyReq = new Proxy<OAuth2Server.Request>(oAuth2Request, {
+            get(target, p: PropertyKey, receiver: any): any {
+                return (target as any).req[p];
+            },
+            set(target, p: PropertyKey, value: any, receiver: any): boolean {
+                (target as any).req[p] = value;
+                return true;
+            },
+        });
+
+        const oAuth2Response = new OAuth2Server.Response({});
+        (oAuth2Response as any).res = res;
+        const proxyRes = new Proxy<OAuth2Server.Response>(oAuth2Response, {
+            get(target, p: PropertyKey, receiver: any): any {
+                return (target as any).res[p];
+            },
+            set(target, p: PropertyKey, value: any, receiver: any): boolean {
+                (target as any).res[p] = value;
+                return true;
+            },
+        });
+
         const oauth2: OAuth2Server = req.app.get('oauth2');
-        oauth2.authorize(req as any, res as any, options, next);
+        oauth2.authorize(proxyReq, proxyRes, options, next);
     }
 }
 
