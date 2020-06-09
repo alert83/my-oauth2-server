@@ -50,6 +50,11 @@ export function authenticateHandler(options?: AuthenticateOptions) {
         (async () => {
             console.log('authenticateHandler:', req.headers, req.params, req.query, req.body);
 
+            if (!req.headers.authorization && req.body?.authentication) {
+                req.headers.authorization =
+                    `${req.body?.authentication?.tokenType} ${req.body?.authentication?.token}`
+            }
+
             const oauth2: OAuth2Server = req.app.get('oauth2');
             const token = await oauth2.authenticate(wrapRequest(req), wrapResponse(res), options);
             res.locals.oauth = {token};
