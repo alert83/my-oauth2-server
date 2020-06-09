@@ -11,39 +11,48 @@ const OAuth2Response = OAuth2Server.Response;
 // Authenticates a request.
 export function authenticateHandler(options?: AuthenticateOptions) {
     return (req: Request, res: Response, next: NextFunction) => {
-        (async () => {
-            const oauth2: OAuth2Server = req.app.get('oauth2');
-            const token = await oauth2.authenticate(new OAuth2Request(req), new OAuth2Response(res), options);
-            res.locals.oauth = {token};
-        })()
-            .then(() => next())
-            .catch(next);
+        // (async () => {
+        //     const oauth2: OAuth2Server = req.app.get('oauth2');
+        //     const token = await oauth2.authenticate(new OAuth2Request(req), new OAuth2Response(res), options);
+        //     res.locals.oauth = {token};
+        // })()
+        //     .then(() => next())
+        //     .catch(next);
+
+        const oauth2: OAuth2Server = req.app.get('oauth2');
+        oauth2.authenticate(new OAuth2Request(req), new OAuth2Response(res), options, next);
     }
 }
 
 // Authorizes a token request.
 export function authorizeHandler(options?: AuthorizeOptions) {
     return (req: Request, res: Response, next: NextFunction) => {
-        (async () => {
-            const oauth2: OAuth2Server = req.app.get('oauth2');
-            const code = await oauth2.authorize(new OAuth2Request(req), new OAuth2Response(res), options);
-            res.locals.oauth = {code};
-        })()
-            .then(() => next())
-            .catch(next);
+        // (async () => {
+        //     const oauth2: OAuth2Server = req.app.get('oauth2');
+        //     const code = await oauth2.authorize(new OAuth2Request(req), new OAuth2Response(res), options);
+        //     res.locals.oauth = {code};
+        // })()
+        //     .then(() => next())
+        //     .catch(next);
+
+        const oauth2: OAuth2Server = req.app.get('oauth2');
+        oauth2.authorize(new OAuth2Request(req), new OAuth2Response(res), options, next);
     }
 }
 
 // Retrieves a new token for an authorized token request.
 export function tokenHandler(options?: TokenOptions) {
     return (req: Request, res: Response, next: NextFunction) => {
-        (async () => {
-            const oauth2: OAuth2Server = req.app.get('oauth2');
-            const token = await oauth2.token(new OAuth2Request(req), new OAuth2Response(res), options);
-            res.locals.oauth = {token};
-        })()
-            .then(() => next())
-            .catch(next);
+        // (async () => {
+        //     const oauth2: OAuth2Server = req.app.get('oauth2');
+        //     const token = await oauth2.token(new OAuth2Request(req), new OAuth2Response(res), options);
+        //     res.locals.oauth = {token};
+        // })()
+        //     .then(() => next())
+        //     .catch(next);
+
+        const oauth2: OAuth2Server = req.app.get('oauth2');
+        oauth2.token(new OAuth2Request(req), new OAuth2Response(res), options, next);
     }
 }
 
