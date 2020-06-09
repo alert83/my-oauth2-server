@@ -3,11 +3,11 @@
 <head></head>
 
 <body>
-<form method="post" action="/login">
+<form method="post" action="/oauth2/login">
     <p><input type="text" placeholder="username" name="username"/></p>
     <p><input type="password" placeholder="password" name="password"/></p>
 
-    <input type="submit" value="Authorize"/>
+    <input type="submit" value="Login"/>
 
     <input type="hidden" name="client_id" value="<%- client_id %>"/>
     <input type="hidden" name="response_type" value="<%- response_type %>"/>
