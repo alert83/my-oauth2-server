@@ -164,7 +164,7 @@ export function xAuthIsValid() {
         }
 
         if (token !== process.env.AUTH_TOKEN)
-            return res.status(400).send("Invalid client access token.").end();
+            return res.status(401).send("Invalid client access token.").end();
 
         next();
     }

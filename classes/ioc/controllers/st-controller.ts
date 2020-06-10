@@ -61,13 +61,17 @@ class StController extends BaseHttpController {
                     return next(err);
                 }
 
-                if (!(req as any).user) {
+                const user: any | undefined = (req as any).user;
+
+                if (!user) {
                     const respJson = _buildResp(GlobalErrorTypes.INTEGRATION_DELETED, 'Integration Deleted');
                     console.log(respJson);
                     return res.status(401).json(respJson);
+                } else if (!(user.permissions as string[]).includes('x:st')) {
+                    return res.status(401).send('Restricted Area');
                 }
 
-                console.log({user: (req as any).user});
+                console.log({user});
 
                 next();
             });
