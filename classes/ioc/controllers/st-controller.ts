@@ -34,10 +34,13 @@ class StController extends BaseHttpController {
                 if (err) {
                     const triggerCodes: ErrorCode[] = ["invalid_token", "revoked_token"];
                     if (err instanceof UnauthorizedError && triggerCodes.includes(err.code)) {
-                        return res.send(merge({}, ...req.body, {
+                        return res.send(merge({}, {
+                            headers : req.body?.headers,
+                            authentication : req.body?.authentication,
+                        }, {
                             headers: {
                                 interactionType:
-                                    req.body.headers.interactionType.replace('Request', 'Response'),
+                                    req.body.headers?.interactionType.replace('Request', 'Response'),
                             },
                             globalError: {
                                 errorEnum: "TOKEN-EXPIRED",
