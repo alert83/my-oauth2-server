@@ -8,6 +8,8 @@ import {auth0Protected, xAuthIsValid} from "../middlewares";
 import {ErrorCode, UnauthorizedError} from "express-jwt";
 import {merge} from 'lodash';
 
+import {GlobalErrorTypes} from "st-schema";
+
 @controller('/st')
 class StController extends BaseHttpController {
 
@@ -40,7 +42,7 @@ class StController extends BaseHttpController {
                             req.body.headers?.interactionType.replace('Request', 'Response'),
                     },
                     globalError: {
-                        errorEnum: "TOKEN-EXPIRED",
+                        errorEnum: GlobalErrorTypes.TOKEN_EXPIRED,
                         detail: "The token has expired",
                     },
                 });

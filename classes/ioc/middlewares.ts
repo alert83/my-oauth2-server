@@ -158,8 +158,10 @@ export function xAuthIsValid() {
     return (req: Request, res: Response, next: NextFunction) => {
         const token = req.header('x-authorization');
 
-        if (!token)
+        if (!token) {
+            console.log("headers:", req.headers);
             return res.status(401).send("Access denied. No client token provided.").end();
+        }
 
         if (token !== process.env.AUTH_TOKEN)
             return res.status(400).send("Invalid client access token.").end();
