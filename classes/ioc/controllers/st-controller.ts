@@ -4,7 +4,7 @@ import {inject} from "inversify";
 //
 import {TYPE} from "../const";
 import {StConnector} from "../../stConnector";
-import {auth0Protected, authenticateHandler, xAuthIsValid} from "../middlewares";
+import {auth0Protected, xAuthIsValid} from "../middlewares";
 
 @controller('/st')
 class StController extends BaseHttpController {
@@ -28,6 +28,14 @@ class StController extends BaseHttpController {
             next();
         },
         auth0Protected(),
+        (req, res, next) => {
+            if (!(req as any).user)
+                return res.sendStatus(401);
+
+            console.log({user: (req as any).user});
+
+            next();
+        },
         // authenticateHandler(),
         // (req: any, res, next) => {
         //     if (req.user) return next();

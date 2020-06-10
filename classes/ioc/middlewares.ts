@@ -181,6 +181,19 @@ export function auth0Protected() {
         audience: 'https://my-oauth2-server.herokuapp.com/auth0',
         issuer: 'https://alert.auth0.com/',
         algorithms: ['RS256'],
+        getToken: req => {
+            if (!req.headers?.authorization && req.body?.authentication) {
+                return req.body?.authentication?.token;
+            }
+
+            if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
+                return req.headers.authorization.split(' ')[1];
+            } else if (req.query && req.query.token) {
+                return req.query.token;
+            }
+
+            return null;
+        }
     })
 }
 
