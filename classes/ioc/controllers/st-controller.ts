@@ -70,7 +70,7 @@ class StController extends BaseHttpController {
                     return res.status(401).send('Restricted Area');
                 }
 
-                // console.log({user});
+                console.log(user);
 
                 req.body._user = user;
 

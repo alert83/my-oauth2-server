@@ -236,16 +236,17 @@ export class StConnector {
                         accessToken,
                     }, {
                         accessToken,
+                        user_id: data._user.sub,
                         callbackAuthentication: {
                             ...callbackAuthentication,
                             expiresAt: moment().add(callbackAuthentication.expiresIn, "seconds").toDate(),
                         },
                         callbackUrls,
-                        // clientId: token?.client?._id,
-                        // userId: token?.user?._id,
-                        // username: token?.user?.username,
                         ctime: new Date(),
                     }, {upsert: true});
+
+
+
                 });
             })
 
