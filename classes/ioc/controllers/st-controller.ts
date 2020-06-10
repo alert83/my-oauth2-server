@@ -5,6 +5,7 @@ import {inject} from "inversify";
 import {TYPE} from "../const";
 import {StConnector} from "../../stConnector";
 import {auth0Protected, xAuthIsValid} from "../middlewares";
+import {UnauthorizedError} from "express-jwt";
 
 @controller('/st')
 class StController extends BaseHttpController {
@@ -30,7 +31,14 @@ class StController extends BaseHttpController {
         (req, res, next) => {
             auth0Protected()(req, res, (err) => {
                 if (err) {
-                    console.log('???');
+                    console.log(err.name, err.code, err.status);
+
+                    if (err instanceof UnauthorizedError) {
+                        return next(err);
+                    }
+
+                    // return res.send();
+
                     return next(err);
                 }
 
