@@ -26,6 +26,7 @@ import {isDev, isProd} from "./classes/utils";
 // import passport from "passport";
 // import Auth0Strategy from "passport-auth0";
 
+
 config();
 
 const RedisStore = connectRedis(session);
@@ -39,6 +40,8 @@ Sentry.init({dsn: process.env.SENTRY_DSN});
 const container = new Container({defaultScope: "Singleton"});
 container.load(buildProviderModule());
 container.bind(TYPE.Application).toConstantValue(app);
+
+
 
 // // Configure Passport to use Auth0
 // const strategy = new Auth0Strategy(
