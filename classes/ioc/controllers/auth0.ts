@@ -21,7 +21,7 @@ const jwtCheck = jwt({
 });
 
 @controller('/auth0',)
-class Common extends BaseHttpController {
+class Auth0 extends BaseHttpController {
 
     constructor(
         @inject(TYPE.Application) private readonly app: Express,
