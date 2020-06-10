@@ -3,22 +3,9 @@ import {inject} from 'inversify';
 import {BaseHttpController, controller, httpGet, httpPost, request, response} from 'inversify-express-utils';
 import {isEmpty} from 'lodash';
 
-import jwks from "jwks-rsa";
-import jwt from "express-jwt";
 
 import {TYPE} from '../const';
 
-const jwtCheck = jwt({
-    secret: jwks.expressJwtSecret({
-        cache: true,
-        rateLimit: true,
-        jwksRequestsPerMinute: 5,
-        jwksUri: 'https://alert.auth0.com/.well-known/jwks.json'
-    }),
-    audience: 'https://my-oauth2-server.herokuapp.com/auth0',
-    issuer: 'https://alert.auth0.com/',
-    algorithms: ['RS256']
-});
 
 @controller('/auth0',)
 class Auth0 extends BaseHttpController {
@@ -29,7 +16,7 @@ class Auth0 extends BaseHttpController {
         super();
     }
 
-    @httpGet('', jwtCheck)
+    @httpGet('')
     private root(
         @request() req: Request,
         @response() res: Response,

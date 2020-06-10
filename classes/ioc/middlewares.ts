@@ -4,6 +4,8 @@ import {Container} from "inversify";
 import {OAuth2Model} from "../OAuth2Model";
 import {TYPE} from "./const";
 import {stringify} from "querystring";
+import jwks from "jwks-rsa";
+import jwt from "express-jwt";
 
 // const OAuth2Request = OAuth2Server.Request;
 // const OAuth2Response = OAuth2Server.Response;
@@ -164,6 +166,22 @@ export function xAuthIsValid() {
 
         next();
     }
+}
+
+//
+
+export function auth0Protected() {
+    return jwt({
+        secret: jwks.expressJwtSecret({
+            cache: true,
+            rateLimit: true,
+            jwksRequestsPerMinute: 5,
+            jwksUri: 'https://alert.auth0.com/.well-known/jwks.json'
+        }),
+        audience: 'https://my-oauth2-server.herokuapp.com/auth0',
+        issuer: 'https://alert.auth0.com/',
+        algorithms: ['RS256'],
+    })
 }
 
 
