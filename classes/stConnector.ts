@@ -85,6 +85,7 @@ export class StConnector {
                 data: {
                     headers: { schema, version, interactionType, requestId },
                     authentication: { tokenType, token },
+                    _user: any,
                 }) => {
                 // console.log('from smartthings', 'discoveryHandler =>', accessToken, data);
                 console.log('from smartthings', 'discoveryHandler =>');
@@ -116,6 +117,7 @@ export class StConnector {
                     headers: { schema, version, interactionType, requestId },
                     authentication: { tokenType, token },
                     devices: { externalDeviceId }[],
+                    _user: any,
                 }) => {
                 // console.log('from smartthings', 'stateRefreshHandler =>', accessToken, data);
                 console.log('from smartthings', 'stateRefreshHandler =>');
@@ -224,7 +226,6 @@ export class StConnector {
                 }) => {
                 // console.log('from smartthings', 'callbackAccessHandler =>', accessToken, data);
                 console.log('from smartthings', 'callbackAccessHandler =>');
-
                 console.log('user:', data._user);
 
                 await this.client.withClient(async (db) => {
@@ -259,9 +260,11 @@ export class StConnector {
                     headers: { schema, version, interactionType, requestId },
                     authentication: { tokenType, token },
                     callbackAuthentication: { accessToken, refreshToken },
+                    _user: any,
                 }) => {
                 // console.log('from smartthings', 'integrationDeletedHandler =>', accessToken, data);
                 console.log('from smartthings', 'integrationDeletedHandler =>');
+                console.log('user:', data._user);
 
                 await this.client.withClient(async (db) => {
                     const collection1 = db.collection('my-oauth2-tokens');
