@@ -32,11 +32,11 @@ export class WatchDogService {
             switchMap(async (diff) => {
                 if (diff > secs) {
                     // console.log('detected');
-                    // await this.sendState('detected');
+                    await this.sendState('detected');
                     // await sendAlertEmail().catch((err) => console.error(err.message));
                 } else {
                     // console.log('clear');
-                    // await this.sendState('clear');
+                    await this.sendState('clear');
                 }
             }),
         ).subscribe();

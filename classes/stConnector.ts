@@ -230,8 +230,6 @@ export class StConnector {
 
                 await this.client.withClient(async (db) => {
                     const collection = db.collection('CallbackAccessTokens');
-                    // const token = await this.model.getAccessToken(accessToken) as Token;
-
                     await collection.findOneAndReplace({
                         accessToken,
                     }, {
@@ -244,9 +242,6 @@ export class StConnector {
                         callbackUrls,
                         ctime: new Date(),
                     }, {upsert: true});
-
-
-
                 });
             })
 
@@ -386,6 +381,7 @@ export class StConnector {
                 // .find({"callbackAuthentication.expiresAt": {$gte: new Date()}})
                 .find()
                 .sort({ctime: -1})
+                .limit(1)
                 .toArray();
         });
 
@@ -406,20 +402,19 @@ export class StConnector {
                     async (callbackAuthentication) => {
                         console.log('refreshedCallback');
 
-                        const accessToken = token.accessToken
                         await this.client.withClient(async (db) => {
                             const collection = db.collection('CallbackAccessTokens');
-
-                            await collection.findOneAndUpdate({
-                                accessToken,
+                            await collection.findOneAndReplace({
+                                accessToken: token.accessToken,
                             }, {
-                                $set: {
-                                    callbackAuthentication: {
-                                        ...callbackAuthentication,
-                                        expiresAt: moment().add(callbackAuthentication.expiresIn, "seconds").toDate(),
-                                    },
+                                ...token,
+
+                                callbackAuthentication: {
+                                    ...callbackAuthentication,
+                                    expiresAt: moment().add(callbackAuthentication.expiresIn, "seconds").toDate(),
                                 },
-                            }, {});
+                                ctime: new Date(),
+                            }, {upsert: true});
                         });
                     },
                 );
