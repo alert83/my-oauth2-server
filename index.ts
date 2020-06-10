@@ -92,12 +92,12 @@ server
         _app
             .set('redis', redis)
             .set('ioc container', container)
-            .set('oauth2', new OAuth2Server({
-                model: container.get<OAuth2Model>(TYPE.OAuth2Model),
-                authorizationCodeLifetime: isProd() ? Number(process.env.CODE_LIFETIME ?? 5 * 60) : 5,
-                accessTokenLifetime: isProd() ? Number(process.env.ACCESS_TOKEN_LIFETIME ?? 2 * 60 * 60) : 5,
-                refreshTokenLifetime: isProd() ? Number(process.env.REFRESH_TOKEN_LIFETIME ?? 14 * 24 * 60 * 60) : 5,
-            }))
+            // .set('oauth2', new OAuth2Server({
+            //     model: container.get<OAuth2Model>(TYPE.OAuth2Model),
+            //     authorizationCodeLifetime: isProd() ? Number(process.env.CODE_LIFETIME ?? 5 * 60) : 5,
+            //     accessTokenLifetime: isProd() ? Number(process.env.ACCESS_TOKEN_LIFETIME ?? 2 * 60 * 60) : 5,
+            //     refreshTokenLifetime: isProd() ? Number(process.env.REFRESH_TOKEN_LIFETIME ?? 14 * 24 * 60 * 60) : 5,
+            // }))
             .set('views', join(__dirname, 'views'))
             .set('view engine', 'ejs')
     })
