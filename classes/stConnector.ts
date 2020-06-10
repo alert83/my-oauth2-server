@@ -220,15 +220,12 @@ export class StConnector {
                     authentication: { tokenType, token },
                     callbackAuthentication: { grantType, scope, code, clientId },
                     callbackUrls: { oauthToken, stateCallback },
+                    _user: any,
                 }) => {
                 // console.log('from smartthings', 'callbackAccessHandler =>', accessToken, data);
                 console.log('from smartthings', 'callbackAccessHandler =>');
 
-                const user = await got.get(`https://${process.env.AUTH0_DOMAIN}/userinfo`, {
-                    headers: {'Authorization': data.authentication.tokenType + ' ' + data.authentication.token}
-                }).json();
-
-                console.log('user:', user);
+                console.log('user:', data._user);
 
                 await this.client.withClient(async (db) => {
                     const collection = db.collection('CallbackAccessTokens');
