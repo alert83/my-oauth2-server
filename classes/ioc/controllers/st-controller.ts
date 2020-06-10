@@ -53,8 +53,8 @@ class StController extends BaseHttpController {
                 if (err) {
                     const triggerCodes: ErrorCode[] = ["invalid_token", "revoked_token"];
                     if (err instanceof UnauthorizedError && triggerCodes.includes(err.code)) {
-                        // const respJson = _buildResp(GlobalErrorTypes.TOKEN_EXPIRED, 'Token Expired');
-                        const respJson = _buildResp(GlobalErrorTypes.INVALID_TOKEN, 'Invalid Token');
+                        const respJson = _buildResp(GlobalErrorTypes.TOKEN_EXPIRED, 'Token Expired');
+                        // const respJson = _buildResp(GlobalErrorTypes.INVALID_TOKEN, 'Invalid Token');
                         console.log(respJson);
                         return res.status(err.status).json(respJson);
                     }
