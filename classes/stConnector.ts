@@ -66,7 +66,7 @@ export class StConnector {
     constructor(
         @inject(TYPE.Application) private readonly app: Express,
         @inject(TYPE.MongoDBClient) private readonly client: MongoService,
-        @inject(TYPE.OAuth2Model) private readonly model: OAuth2Model,
+        // @inject(TYPE.OAuth2Model) private readonly model: OAuth2Model,
     ) {
         this.connector = new SchemaConnector()
             .clientId(process.env.ST_CLIENT_ID)
@@ -221,7 +221,7 @@ export class StConnector {
 
                 await this.client.withClient(async (db) => {
                     const collection = db.collection('CallbackAccessTokens');
-                    const token = await this.model.getAccessToken(accessToken) as Token;
+                    // const token = await this.model.getAccessToken(accessToken) as Token;
 
                     await collection.findOneAndReplace({
                         accessToken,
@@ -232,9 +232,9 @@ export class StConnector {
                             expiresAt: moment().add(callbackAuthentication.expiresIn, "seconds").toDate(),
                         },
                         callbackUrls,
-                        clientId: token?.client?._id,
-                        userId: token?.user?._id,
-                        username: token?.user?.username,
+                        // clientId: token?.client?._id,
+                        // userId: token?.user?._id,
+                        // username: token?.user?.username,
                         ctime: new Date(),
                     }, {upsert: true});
                 });

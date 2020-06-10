@@ -42,7 +42,6 @@ container.load(buildProviderModule());
 container.bind(TYPE.Application).toConstantValue(app);
 
 
-
 // // Configure Passport to use Auth0
 // const strategy = new Auth0Strategy(
 //     {
