@@ -224,6 +224,12 @@ export class StConnector {
                 // console.log('from smartthings', 'callbackAccessHandler =>', accessToken, data);
                 console.log('from smartthings', 'callbackAccessHandler =>');
 
+                const user = await got.get(`https://${process.env.AUTH0_DOMAIN}/userinfo`, {
+                    headers: {'Authorization': data.authentication.tokenType + ' ' + data.authentication.token}
+                }).json();
+
+                console.log('user:', user);
+
                 await this.client.withClient(async (db) => {
                     const collection = db.collection('CallbackAccessTokens');
                     // const token = await this.model.getAccessToken(accessToken) as Token;
@@ -378,7 +384,7 @@ export class StConnector {
             return await collection
                 // .find({"callbackAuthentication.expiresAt": {$gte: new Date()}})
                 .find()
-                .sort({_id: -1})
+                .sort({ctime: -1})
                 .toArray();
         });
 

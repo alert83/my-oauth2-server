@@ -177,11 +177,11 @@ export function auth0Protected() {
         secret: jwks.expressJwtSecret({
             cache: true,
             rateLimit: true,
-            jwksRequestsPerMinute: 5,
-            jwksUri: 'https://alert.auth0.com/.well-known/jwks.json'
+            jwksRequestsPerMinute: 60,
+            jwksUri: `https://${process.env.AUTH0_DOMAIN}/.well-known/jwks.json`,
         }),
-        audience: 'https://my-oauth2-server.herokuapp.com/st',
-        issuer: 'https://alert.auth0.com/',
+        audience: process.env.AUTH0_AUDIENCE,
+        issuer: `https://${process.env.AUTH0_DOMAIN}/`,
         algorithms: ['RS256'],
         getToken: req => {
             if (!req.headers?.authorization && req.body?.authentication) {

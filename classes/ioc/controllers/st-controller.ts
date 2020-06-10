@@ -49,7 +49,6 @@ class StController extends BaseHttpController {
                     });
                 }
 
-
                 if (err) {
                     const triggerCodes: ErrorCode[] = ["invalid_token", "revoked_token"];
                     if (err instanceof UnauthorizedError && triggerCodes.includes(err.code)) {
