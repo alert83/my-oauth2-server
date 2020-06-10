@@ -5,7 +5,8 @@ import {inject} from "inversify";
 import {TYPE} from "../const";
 import {StConnector} from "../../stConnector";
 import {auth0Protected, xAuthIsValid} from "../middlewares";
-import {UnauthorizedError} from "express-jwt";
+import {ErrorCode, UnauthorizedError} from "express-jwt";
+import {merge} from 'lodash';
 
 @controller('/st')
 class StController extends BaseHttpController {
@@ -31,20 +32,24 @@ class StController extends BaseHttpController {
         (req, res, next) => {
             auth0Protected()(req, res, (err) => {
                 if (err) {
-                    console.log(err.name, err.code, err.status);
-
-                    if (err instanceof UnauthorizedError) {
-                        return next(err);
+                    const triggerCodes: ErrorCode[] = ["invalid_token", "revoked_token"];
+                    if (err instanceof UnauthorizedError && triggerCodes.includes(err.code)) {
+                        return res.send(merge({}, ...req.body, {
+                            headers: {
+                                interactionType:
+                                    req.body.headers.interactionType.replace('Request', 'Response'),
+                            },
+                            globalError: {
+                                errorEnum: "TOKEN-EXPIRED",
+                                detail: "The token has expired",
+                            },
+                        }));
                     }
-
-                    // return res.send();
-
                     return next(err);
                 }
 
                 if (!(req as any).user) {
-                    console.log('!!!');
-                    return res.sendStatus(401);
+                    return res.status(401).send('No user');
                 }
 
                 console.log({user: (req as any).user});
