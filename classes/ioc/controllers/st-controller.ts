@@ -35,7 +35,7 @@ class StController extends BaseHttpController {
             auth0Protected()(req, res, (err) => {
 
                 function _buildResp(errType: GlobalErrorTypes, detail: string) {
-                    merge({}, {
+                    return merge({}, {
                         headers : req.body?.headers,
                     }, {
                         headers: {
