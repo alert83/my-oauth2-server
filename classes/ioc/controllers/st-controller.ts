@@ -27,14 +27,22 @@ class StController extends BaseHttpController {
 
             next();
         },
-        auth0Protected(),
         (req, res, next) => {
-            if (!(req as any).user)
-                return res.sendStatus(401);
+            auth0Protected()(req, res, (err) => {
+                if (err) {
+                    console.log('???');
+                    return next(err);
+                }
 
-            console.log({user: (req as any).user});
+                if (!(req as any).user) {
+                    console.log('!!!');
+                    return res.sendStatus(401);
+                }
 
-            next();
+                console.log({user: (req as any).user});
+
+                next();
+            });
         },
         // authenticateHandler(),
         // (req: any, res, next) => {
