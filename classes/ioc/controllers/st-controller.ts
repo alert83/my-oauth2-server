@@ -35,7 +35,6 @@ class StController extends BaseHttpController {
             auth0Protected()(req, res, (err) => {
                 const respBody = merge({}, {
                     headers : req.body?.headers,
-                    authentication : req.body?.authentication,
                 }, {
                     headers: {
                         interactionType:
