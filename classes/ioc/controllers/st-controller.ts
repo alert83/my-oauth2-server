@@ -52,10 +52,10 @@ class StController extends BaseHttpController {
                 if (err) {
                     const triggerCodes: ErrorCode[] = ["invalid_token", "revoked_token"];
                     if (err instanceof UnauthorizedError && triggerCodes.includes(err.code)) {
-                        const respJson = _buildResp(GlobalErrorTypes.TOKEN_EXPIRED, 'Token Expired');
+                        const respJson = _buildResp(GlobalErrorTypes.TOKEN_EXPIRED, 'The token has expired');
                         // const respJson = _buildResp(GlobalErrorTypes.INVALID_TOKEN, 'Invalid Token');
-                        console.log(respJson);
-                        return res.status(401).send('Token expired');
+                        // console.log(respJson);
+                        return res.status(401).send(respJson);
                     }
                     return next(err);
                 }
@@ -64,8 +64,8 @@ class StController extends BaseHttpController {
 
                 if (!user) {
                     const respJson = _buildResp(GlobalErrorTypes.INTEGRATION_DELETED, 'Integration Deleted');
-                    console.log(respJson);
-                    return res.status(401).send('Token invalid');
+                    // console.log(respJson);
+                    return res.status(401).send(respJson);
                 } else if (!(user.permissions as string[]).includes('x:st')) {
                     return res.status(401).send('Restricted Area');
                 }
