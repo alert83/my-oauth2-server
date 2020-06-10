@@ -55,7 +55,7 @@ class StController extends BaseHttpController {
                         const respJson = _buildResp(GlobalErrorTypes.TOKEN_EXPIRED, 'Token Expired');
                         // const respJson = _buildResp(GlobalErrorTypes.INVALID_TOKEN, 'Invalid Token');
                         console.log(respJson);
-                        return res.status(err.status).json(respJson);
+                        return res.status(500).json(respJson);
                     }
                     return next(err);
                 }
@@ -65,9 +65,9 @@ class StController extends BaseHttpController {
                 if (!user) {
                     const respJson = _buildResp(GlobalErrorTypes.INTEGRATION_DELETED, 'Integration Deleted');
                     console.log(respJson);
-                    return res.status(401).json(respJson);
+                    return res.status(500).json(respJson);
                 } else if (!(user.permissions as string[]).includes('x:st')) {
-                    return res.status(401).send('Restricted Area');
+                    return res.status(500).send('Restricted Area');
                 }
 
                 // console.log(user);
