@@ -178,7 +178,7 @@ export function auth0Protected() {
             jwksRequestsPerMinute: 5,
             jwksUri: 'https://alert.auth0.com/.well-known/jwks.json'
         }),
-        audience: 'https://my-oauth2-server.herokuapp.com/auth0',
+        audience: 'https://my-oauth2-server.herokuapp.com/st',
         issuer: 'https://alert.auth0.com/',
         algorithms: ['RS256'],
         getToken: req => {
@@ -194,7 +194,7 @@ export function auth0Protected() {
 
             return null;
         }
-    })
+    }).unless({path: ['/command']})
 }
 
 
