@@ -71,6 +71,7 @@ export class StConnector {
         this.connector = new SchemaConnector()
             .clientId(process.env.ST_CLIENT_ID)
             .clientSecret(process.env.ST_CLIENT_SECRET)
+            .enableEventLogging(null, true)
 
             /**
              * Discovery request. Respond with a list of devices. Called after installation of the
