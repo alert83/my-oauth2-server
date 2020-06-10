@@ -43,12 +43,12 @@ class Common extends BaseHttpController {
 
     //
 
-    // @httpGet('/oauth/callback')
-    // private async oauthCallback(
-    //     @request() req: Request,
-    //     @response() res: Response,
-    // ) {
-    //     console.log('oauth/callback:', req.params, req.query, req.body);
-    //     res.end();
-    // }
+    @httpGet('/oauth/callback')
+    private async oauthCallback(
+        @request() req: Request,
+        @response() res: Response,
+    ) {
+        console.log('oauth/callback:', req.params, req.query, req.body);
+        res.end();
+    }
 }

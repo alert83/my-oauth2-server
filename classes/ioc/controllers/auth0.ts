@@ -3,10 +3,10 @@ import {inject} from 'inversify';
 import {BaseHttpController, controller, httpGet, httpPost, request, response} from 'inversify-express-utils';
 import {isEmpty} from 'lodash';
 
-import {TYPE} from '../const';
-
 import jwks from "jwks-rsa";
 import jwt from "express-jwt";
+
+import {TYPE} from '../const';
 
 const jwtCheck = jwt({
     secret: jwks.expressJwtSecret({
@@ -35,23 +35,10 @@ class Auth0 extends BaseHttpController {
         @response() res: Response,
     ) {
         if (!(req as any).user) return res.sendStatus(401);
-        res.send({...req.query, user: (req as any).user});
+        res.send({
+            query: req.query,
+            user: (req as any).user
+        });
     }
 
-    @httpPost('/ngrok')
-    private async ngrok(
-        @request() req: Request,
-        @response() res: Response,
-    ) {
-        const cbUrl: string = req.body.url;
-
-        if (!isEmpty(cbUrl)) {
-            const redis = this.app.get('redis');
-            await redis.set("ngrok", cbUrl);
-
-            res.status(200).send(await redis.get("ngrok"));
-        } else {
-            res.status(500).send('Empty cb url')
-        }
-    }
 }
