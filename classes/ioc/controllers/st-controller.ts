@@ -31,22 +31,26 @@ class StController extends BaseHttpController {
         },
         (req, res, next) => {
             auth0Protected()(req, res, (err) => {
+
+                const respBody = merge({}, {
+                    headers : req.body?.headers,
+                    authentication : req.body?.authentication,
+                }, {
+                    headers: {
+                        interactionType:
+                            req.body.headers?.interactionType.replace('Request', 'Response'),
+                    },
+                    globalError: {
+                        errorEnum: "TOKEN-EXPIRED",
+                        detail: "The token has expired",
+                    },
+                });
+
                 if (err) {
                     const triggerCodes: ErrorCode[] = ["invalid_token", "revoked_token"];
                     if (err instanceof UnauthorizedError && triggerCodes.includes(err.code)) {
-                        return res.send(merge({}, {
-                            headers : req.body?.headers,
-                            authentication : req.body?.authentication,
-                        }, {
-                            headers: {
-                                interactionType:
-                                    req.body.headers?.interactionType.replace('Request', 'Response'),
-                            },
-                            globalError: {
-                                errorEnum: "TOKEN-EXPIRED",
-                                detail: "The token has expired",
-                            },
-                        }));
+                        console.log(respBody);
+                        return res.status(err.status).send(respBody);
                     }
                     return next(err);
                 }
