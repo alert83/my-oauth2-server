@@ -86,7 +86,8 @@ export class StConnector {
                     headers: { schema, version, interactionType, requestId },
                     authentication: { tokenType, token },
                 }) => {
-                console.log('from smartthings', 'discoveryHandler =>', accessToken, data);
+                // console.log('from smartthings', 'discoveryHandler =>', accessToken, data);
+                console.log('from smartthings', 'discoveryHandler =>');
 
                 const devices: IDevice[] = await this.client.withClient(async (db) => {
                     const collection = db.collection<IDevice>('my-devices');
@@ -116,7 +117,8 @@ export class StConnector {
                     authentication: { tokenType, token },
                     devices: { externalDeviceId }[],
                 }) => {
-                console.log('from smartthings', 'stateRefreshHandler =>', accessToken, data);
+                // console.log('from smartthings', 'stateRefreshHandler =>', accessToken, data);
+                console.log('from smartthings', 'stateRefreshHandler =>');
 
                 const ids = data.devices ? data.devices.map((d) => d.externalDeviceId) : undefined;
                 const devices: IDevice[] = await this.client.withClient(async (db) => {
@@ -162,7 +164,8 @@ export class StConnector {
                 }[],
                 data,
             ) => {
-                console.log('from smartthings', 'commandHandler =>', accessToken, devices, data);
+                // console.log('from smartthings', 'commandHandler =>', accessToken, devices, data);
+                console.log('from smartthings', 'commandHandler =>');
 
                 await Bluebird.each(devices, async (device) => {
                     const deviceResponse = response.addDevice(device.externalDeviceId);
@@ -218,7 +221,8 @@ export class StConnector {
                     callbackAuthentication: { grantType, scope, code, clientId },
                     callbackUrls: { oauthToken, stateCallback },
                 }) => {
-                console.log('from smartthings', 'callbackAccessHandler =>', accessToken, data);
+                // console.log('from smartthings', 'callbackAccessHandler =>', accessToken, data);
+                console.log('from smartthings', 'callbackAccessHandler =>');
 
                 await this.client.withClient(async (db) => {
                     const collection = db.collection('CallbackAccessTokens');
@@ -253,7 +257,8 @@ export class StConnector {
                     authentication: { tokenType, token },
                     callbackAuthentication: { accessToken, refreshToken },
                 }) => {
-                console.log('from smartthings', 'integrationDeletedHandler =>', accessToken, data);
+                // console.log('from smartthings', 'integrationDeletedHandler =>', accessToken, data);
+                console.log('from smartthings', 'integrationDeletedHandler =>');
 
                 await this.client.withClient(async (db) => {
                     const collection1 = db.collection('my-oauth2-tokens');
