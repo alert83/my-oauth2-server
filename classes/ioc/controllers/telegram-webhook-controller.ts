@@ -1,4 +1,4 @@
-import {BaseHttpController, controller, httpGet, request, response} from 'inversify-express-utils';
+import {BaseHttpController, controller, httpGet, httpPost, request, response} from 'inversify-express-utils';
 import {Request, Response} from "express";
 import {inject} from "inversify";
 
@@ -14,7 +14,7 @@ class TelegramWebhookController extends BaseHttpController {
         super();
     }
 
-    @httpGet('/')
+    @httpPost('/')
     public async root(
         @request() req: Request,
         @response() res: Response,
