@@ -36,11 +36,11 @@ const redis = new Redis(process.env.REDIS_URL);
 const PORT = process.env.PORT || 5000
 const app = express();
 
-const bot = new Telegraf(process.env.BOT_TOKEN ?? '')
-bot.telegram
-    .setWebhook(`https://my-oauth2-server.herokuapp.com:8443/${process.env.SECRET_PATH}`)
-    .then(console.log)
-    .catch(console.error)
+// const bot = new Telegraf(process.env.BOT_TOKEN ?? '')
+// bot.telegram
+//     .setWebhook(`https://my-oauth2-server.herokuapp.com:8443/${process.env.SECRET_PATH}`)
+//     .then(console.log)
+//     .catch(console.error)
 
 Sentry.init({dsn: process.env.SENTRY_DSN});
 
@@ -93,7 +93,7 @@ server
             }))
             // .use(passport.initialize())
             // .use(passport.session())
-            .use(bot.webhookCallback('/' + process.env.SECRET_PATH))
+            // .use(bot.webhookCallback('/' + process.env.SECRET_PATH))
             .use(express.static(join(__dirname, 'public')))
         //
         _app
