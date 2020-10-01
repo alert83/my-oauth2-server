@@ -22,10 +22,10 @@ class TelegramWebhookController extends BaseHttpController {
         @request() req: Request,
         @response() res: Response,
     ) {
-        console.log(req.body);
+        // console.log(req.body);
 
         const redis = this.app.get('redis');
-        await got.post(await redis.get("ngrok") ?? '', {
+        await got.post((await redis.get("ngrok") ?? '') + '/twh', {
             username: process.env.NGROK_USER,
             password: process.env.NGROK_PASS,
             json: req.body,

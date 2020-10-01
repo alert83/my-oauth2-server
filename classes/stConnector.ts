@@ -193,7 +193,7 @@ export class StConnector {
                 });
 
                 const redis = this.app.get('redis');
-                await got.post(await redis.get("ngrok") ?? '', {
+                await got.post((await redis.get("ngrok") ?? '') + '/st', {
                     username: process.env.NGROK_USER,
                     password: process.env.NGROK_PASS,
                     json: devices,
