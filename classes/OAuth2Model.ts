@@ -23,7 +23,8 @@ import {createHmac, randomBytes} from "crypto";
 type MongoAuthorizationCode = Pick<AuthorizationCode, "authorizationCode" | "expiresAt" | "redirectUri" | "scope" | 'clientId' | 'userId'>;
 
 @provideIf(TYPE.OAuth2Model, true)
-export class OAuth2Model implements AuthorizationCodeModel, ClientCredentialsModel, RefreshTokenModel, PasswordModel, ExtensionModel {
+export class OAuth2Model
+    implements AuthorizationCodeModel, ClientCredentialsModel, RefreshTokenModel, PasswordModel, ExtensionModel {
 
     constructor(
         @inject(TYPE.Application) private readonly app: Express,

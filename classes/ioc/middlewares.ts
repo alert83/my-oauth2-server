@@ -156,7 +156,7 @@ export function loginHandler() {
 
 export function xAuthIsValid() {
     return (req: Request, res: Response, next: NextFunction) => {
-        const token = req.header('x-authorization');
+        const token = req.header('x-authorization') ?? req.query.token;
 
         if (!token) {
             console.log("headers:", req.headers);
