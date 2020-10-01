@@ -38,7 +38,8 @@ const app = express();
 
 const bot = new Telegraf(process.env.BOT_TOKEN ?? '')
 bot.telegram
-    .setWebhook('https://my-oauth2-server.herokuapp.com:8443/5b25fe4e-eec8-4923-a2b7-6739290c6e5c')
+    .setWebhook(`https://my-oauth2-server.herokuapp.com:8443/${process.env.SECRET_PATH}`)
+    .then(console.log)
     .catch(console.error)
 
 Sentry.init({dsn: process.env.SENTRY_DSN});
@@ -92,7 +93,7 @@ server
             }))
             // .use(passport.initialize())
             // .use(passport.session())
-            .use(bot.webhookCallback('/5b25fe4e-eec8-4923-a2b7-6739290c6e5c'))
+            .use(bot.webhookCallback('/' + process.env.SECRET_PATH))
             .use(express.static(join(__dirname, 'public')))
         //
         _app
