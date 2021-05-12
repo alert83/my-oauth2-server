@@ -30,7 +30,7 @@
     "lodash": "^4.17.15",
     "moment": "^2.26.0",
     "mongodb": "^3.5.8",
-    "nodemailer": "^6.4.8",
+    "nodemailer": "^6.4.16",
     "oauth2-server": "^3.0.2",
     "passport": "^0.4.1",
     "passport-auth0": "^1.3.3",
