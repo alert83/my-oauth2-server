@@ -21,7 +21,7 @@
     "express": "^4.17.1",
     "express-jwt": "^5.3.3",
     "express-session": "^1.17.1",
-    "got": "^11.3.0",
+    "got": "^11.8.5",
     "inversify": "^5.0.1",
     "inversify-binding-decorators": "^4.0.0",
     "inversify-express-utils": "^6.3.2",
